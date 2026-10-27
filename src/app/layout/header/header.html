@@ -1,0 +1,21 @@
+<mat-toolbar class="header">
+  <button
+    matIconButton
+    type="button"
+    aria-label="Toggle navigation"
+    [attr.aria-controls]="navigationId()"
+    [attr.aria-expanded]="navigationOpen()"
+    (click)="menuToggle.emit()"
+  >
+    <mat-icon>menu</mat-icon>
+  </button>
+
+  <a class="header__brand" routerLink="/dashboard">
+    <mat-icon class="header__logo">shield</mat-icon>
+    <span>{{ appName() }}</span>
+  </a>
+
+  <span class="header__spacer"></span>
+
+  <span class="header__badge">Demo environment</span>
+</mat-toolbar>

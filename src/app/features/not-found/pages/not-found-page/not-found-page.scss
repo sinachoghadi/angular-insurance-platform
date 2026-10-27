@@ -1,0 +1,24 @@
+.not-found {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-block: var(--app-space-5);
+  text-align: center;
+}
+
+.not-found__code {
+  margin: 0;
+  font: var(--mat-sys-display-medium);
+  color: var(--mat-sys-primary);
+}
+
+.not-found__title {
+  margin: var(--app-space-2) 0;
+  font: var(--mat-sys-headline-small);
+}
+
+.not-found__message {
+  max-width: 48ch;
+  margin: 0 0 var(--app-space-4);
+  color: var(--mat-sys-on-surface-variant);
+}

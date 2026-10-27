@@ -1,1 +1,75 @@
-/* You can add global styles to this file, and also import other style files */
+// Angular Material 3 theme. `mat.theme()` emits `--mat-sys-*` CSS variables
+// that both Material components and our own components consume.
+// See https://material.angular.dev/guide/theming
+@use '@angular/material' as mat;
+
+html {
+  height: 100%;
+  color-scheme: light;
+
+  @include mat.theme(
+    (
+      color: (
+        primary: mat.$azure-palette,
+        tertiary: mat.$blue-palette,
+      ),
+      typography: (
+        plain-family: 'Roboto, "Helvetica Neue", Arial, sans-serif',
+        brand-family: 'Roboto, "Helvetica Neue", Arial, sans-serif',
+      ),
+      density: 0,
+    )
+  );
+
+  // Application-level layout tokens shared by the shell and pages.
+  --app-header-height: 64px;
+  --app-sidebar-width: 256px;
+  --app-content-max-width: 1280px;
+  --app-space-1: 4px;
+  --app-space-2: 8px;
+  --app-space-3: 16px;
+  --app-space-4: 24px;
+  --app-space-5: 32px;
+  --app-radius: 12px;
+}
+
+body {
+  height: 100%;
+  margin: 0;
+  background-color: var(--mat-sys-surface-container-low);
+  color: var(--mat-sys-on-surface);
+  font: var(--mat-sys-body-medium);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+// Visible focus ring for keyboard users across custom and Material elements.
+:focus-visible {
+  outline: 2px solid var(--mat-sys-primary);
+  outline-offset: 2px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

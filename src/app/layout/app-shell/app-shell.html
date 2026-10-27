@@ -1,0 +1,28 @@
+<button type="button" class="skip-link" (click)="skipToContent()">Skip to main content</button>
+
+<div class="shell">
+  <app-header
+    [appName]="appName"
+    [navigationId]="navigationId"
+    [navigationOpen]="sidenavOpen()"
+    (menuToggle)="toggleSidenav()"
+  />
+
+  <mat-sidenav-container class="shell__body">
+    <mat-sidenav
+      class="shell__sidenav"
+      [id]="navigationId"
+      [mode]="sidenavMode()"
+      [opened]="sidenavOpen()"
+      (closedStart)="onSidenavClosed()"
+    >
+      <app-sidebar [items]="navItems" (navigated)="onNavigated()" />
+    </mat-sidenav>
+
+    <mat-sidenav-content class="shell__content">
+      <main #mainContent class="shell__main" tabindex="-1">
+        <router-outlet />
+      </main>
+    </mat-sidenav-content>
+  </mat-sidenav-container>
+</div>

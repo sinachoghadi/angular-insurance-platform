@@ -55,10 +55,15 @@ src/app/
 │   │   ├── state/
 │   │   └── models/
 │   ├── claims/
-│   └── users/
+│   ├── users/
+│   └── not-found/
 ├── app.config.ts
 └── app.routes.ts
 ```
+
+Each feature exposes a default-exported `<feature>.routes.ts` that is lazy-loaded from
+`app.routes.ts`. Route-level pages live in `features/<feature>/pages/`. Shell navigation items are
+defined in `layout/navigation.ts`.
 
 ### 4. State Management Strategy
 

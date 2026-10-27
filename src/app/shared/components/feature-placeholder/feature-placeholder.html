@@ -1,0 +1,17 @@
+<mat-card appearance="outlined" class="placeholder">
+  <mat-card-content class="placeholder__content">
+    <span class="placeholder__icon">
+      <mat-icon>{{ icon() }}</mat-icon>
+    </span>
+    <h2 class="placeholder__heading">{{ heading() }}</h2>
+
+    @if (plannedItems().length > 0) {
+      <p class="placeholder__lead">Planned capabilities:</p>
+      <ul class="placeholder__list">
+        @for (item of plannedItems(); track item) {
+          <li>{{ item }}</li>
+        }
+      </ul>
+    }
+  </mat-card-content>
+</mat-card>

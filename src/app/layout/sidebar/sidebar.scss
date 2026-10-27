@@ -1,0 +1,16 @@
+@use '@angular/material' as mat;
+
+:host {
+  display: block;
+
+  @include mat.list-overrides(
+    (
+      active-indicator-shape: 999px,
+      active-indicator-color: var(--mat-sys-secondary-container),
+    )
+  );
+}
+
+.sidebar {
+  padding: var(--app-space-2);
+}

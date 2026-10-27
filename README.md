@@ -1,59 +1,33 @@
-# InsurancePortal
+# Enterprise Insurance Management Portal
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.2.4.
+A portfolio project that simulates an enterprise insurance back-office: policies, claims,
+users, and an operational dashboard. All data and authentication are fictional (demo only).
 
-## Development server
+See [docs/PRD.md](docs/PRD.md) for product scope and [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+for the technical plan. Progress is tracked in [docs/PROGRESS.md](docs/PROGRESS.md) and
+architectural decisions in [docs/DECISIONS.md](docs/DECISIONS.md).
 
-To start a local development server, run:
+## Tech stack
 
-```bash
-ng serve
-```
+- Angular 22 (standalone components, zoneless, Signals, OnPush by default)
+- Angular Material 3 + SCSS
+- RxJS for asynchronous streams
+- Vitest + jsdom for unit tests
+- TypeScript strict mode with strict template type checking
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+## Requirements
 
-## Code scaffolding
+- Node.js 22.12+ (developed on Node 24)
+- npm 10+
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## Commands
 
-```bash
-ng generate component component-name
-```
+| Task                    | Command                     |
+| ----------------------- | --------------------------- |
+| Install dependencies    | `npm install`               |
+| Dev server (port 4200)  | `npm start`                 |
+| Unit tests (watch)      | `npm test`                  |
+| Unit tests (single run) | `npm test -- --watch=false` |
+| Production build        | `npm run build`             |
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+The production build is written to `dist/insurance-portal/browser`.

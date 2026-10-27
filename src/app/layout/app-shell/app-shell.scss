@@ -1,0 +1,59 @@
+@use '@angular/material' as mat;
+
+:host {
+  display: block;
+  height: 100%;
+
+  @include mat.sidenav-overrides(
+    (
+      container-width: var(--app-sidebar-width),
+      container-shape: 0,
+      container-background-color: var(--mat-sys-surface),
+      container-divider-color: var(--mat-sys-outline-variant),
+      content-background-color: var(--mat-sys-surface-container-low),
+    )
+  );
+}
+
+.shell {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.shell__body {
+  flex: 1 1 auto;
+}
+
+.shell__main {
+  max-width: var(--app-content-max-width);
+  margin-inline: auto;
+  padding: var(--app-space-4);
+
+  &:focus {
+    outline: none;
+  }
+
+  @media (max-width: 599.98px) {
+    padding: var(--app-space-3);
+  }
+}
+
+.skip-link {
+  position: absolute;
+  inset-block-start: var(--app-space-2);
+  inset-inline-start: var(--app-space-2);
+  z-index: 10;
+  padding: var(--app-space-2) var(--app-space-3);
+  border: 0;
+  border-radius: 8px;
+  background-color: var(--mat-sys-primary);
+  color: var(--mat-sys-on-primary);
+  font: var(--mat-sys-label-large);
+  cursor: pointer;
+  transform: translateY(-200%);
+
+  &:focus-visible {
+    transform: none;
+  }
+}
