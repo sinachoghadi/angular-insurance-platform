@@ -18,4 +18,32 @@
   <span class="header__spacer"></span>
 
   <span class="header__badge">Demo environment</span>
+
+  @if (user(); as user) {
+    <button
+      matButton
+      type="button"
+      class="header__account"
+      [matMenuTriggerFor]="accountMenu"
+      [attr.aria-label]="'Account menu for ' + user.name + ', ' + roleLabel()"
+    >
+      <span class="header__avatar" aria-hidden="true">{{ initials() }}</span>
+      <span class="header__identity">
+        <span class="header__name">{{ user.name }}</span>
+        <span class="header__role">{{ roleLabel() }}</span>
+      </span>
+      <mat-icon iconPositionEnd>expand_more</mat-icon>
+    </button>
+
+    <mat-menu #accountMenu="matMenu" xPosition="before">
+      <div class="header__menu-info">
+        <span class="header__menu-name">{{ user.name }}</span>
+        <span class="header__menu-email">{{ user.email }}</span>
+      </div>
+      <button mat-menu-item type="button" (click)="logout.emit()">
+        <mat-icon>logout</mat-icon>
+        <span>Sign out</span>
+      </button>
+    </mat-menu>
+  }
 </mat-toolbar>

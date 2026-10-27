@@ -5,7 +5,9 @@
     [appName]="appName"
     [navigationId]="navigationId"
     [navigationOpen]="sidenavOpen()"
+    [user]="user()"
     (menuToggle)="toggleSidenav()"
+    (logout)="logout()"
   />
 
   <mat-sidenav-container class="shell__body">
@@ -16,7 +18,7 @@
       [opened]="sidenavOpen()"
       (closedStart)="onSidenavClosed()"
     >
-      <app-sidebar [items]="navItems" (navigated)="onNavigated()" />
+      <app-sidebar [items]="navItems()" (navigated)="onNavigated()" />
     </mat-sidenav>
 
     <mat-sidenav-content class="shell__content">

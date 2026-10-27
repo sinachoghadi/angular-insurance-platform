@@ -51,3 +51,58 @@
     display: none;
   }
 }
+
+.header__account {
+  height: 48px;
+  padding-inline: var(--app-space-1) var(--app-space-2);
+  color: var(--mat-sys-on-surface);
+}
+
+.header__avatar {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: var(--mat-sys-primary);
+  color: var(--mat-sys-on-primary);
+  font: var(--mat-sys-label-large);
+}
+
+.header__identity {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-inline-start: var(--app-space-2);
+  line-height: 1.2;
+  text-align: start;
+
+  @media (max-width: 599.98px) {
+    display: none;
+  }
+}
+
+.header__name {
+  font: var(--mat-sys-label-large);
+}
+
+.header__role {
+  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-label-small);
+}
+
+.header__menu-info {
+  display: flex;
+  flex-direction: column;
+  padding: var(--app-space-2) var(--app-space-3);
+  border-block-end: 1px solid var(--mat-sys-outline-variant);
+}
+
+.header__menu-name {
+  font: var(--mat-sys-title-small);
+}
+
+.header__menu-email {
+  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-body-small);
+}

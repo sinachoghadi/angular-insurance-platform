@@ -65,4 +65,63 @@ in line with the architecture's state-management strategy.
 **Decision:** Files are named without type suffixes (`app-shell.ts` → `AppShell`,
 `viewport.ts` → `Viewport`), matching what the Angular CLI generates.
 **Why:** It is the current official style guide and keeps hand-written files consistent with
-generated ones.
+generated ones. Phase 2 follows the same rule (`auth-store.ts`, `auth-guard.ts`,
+`auth-interceptor.ts`) instead of the `auth.service.ts` style.
+
+## ADR-010 — HttpOnly cookie sessions instead of JWTs in storage
+
+**Decision:** `POST /api/auth/login` creates an opaque, random server-side session and sets it
+as an `HttpOnly; SameSite=Strict; Path=/api` cookie with a fixed 30-minute lifetime. The SPA
+never sees the session id. No access or refresh tokens exist, so nothing sensitive is kept in
+`localStorage` or `sessionStorage`.
+**Why:** XSS cannot read the credential, logout really invalidates it on the server, and
+session restore after refresh is just `GET /api/auth/me`.
+**Trade-offs:** Cookies need CSRF protection (ADR-011). A cross-origin API would need CORS with
+credentials and `SameSite=None; Secure`. `Secure` is omitted because the dev server uses plain HTTP.
+
+## ADR-011 — Double-submit XSRF token for mutating requests
+
+**Decision:** Login also sets a readable `XSRF-TOKEN` cookie bound to the session. Angular's
+built-in `HttpClient` XSRF support copies it into `X-XSRF-TOKEN` on non-GET same-origin requests,
+and the API rejects authenticated mutations (currently logout) whose header does not match.
+**Why:** It adds defence in depth on top of `SameSite=Strict`, with no custom frontend code.
+
+## ADR-012 — Development-only mock API built on Node.js built-ins
+
+**Decision:** `mock-api/` is a small `node:http` server with in-memory sessions, scrypt
+password hashes, and role checks, proxied by the Angular dev server (`proxy.conf.json`).
+**Why:** JSON Server cannot issue HttpOnly cookies or enforce per-endpoint roles without custom
+middleware, and the requirement was to avoid unnecessary dependencies. The proxy keeps the API
+same-origin, so `SameSite=Strict` cookies work. Tests use `node:test` and real HTTP.
+
+## ADR-013 — Signal-based `AuthStore` with an RxJS data layer
+
+**Decision:** `AuthApi` is stateless HTTP. `AuthStore` holds one private `signal<AuthState>` and
+exposes read-only `computed` slices (`user`, `status`, `isAuthenticated`, `role`, `loginPending`,
+`loginError`). Async work (login, logout, restore, expiry timer) uses RxJS. NgRx is not used.
+**Why:** A single state object keeps transitions atomic. Computed signals give derived state for
+templates, and RxJS handles cancellation and concurrency (`shareReplay` lets concurrent guards
+share one restore request).
+
+## ADR-014 — Guards wait for session restoration
+
+**Decision:** Guards call `authStore.ensureInitialized()`, which performs `GET /auth/me` once
+per app load. There is no `APP_INITIALIZER`.
+**Why:** Bootstrapping is never blocked, and the first navigation simply waits for the guard.
+`canActivateChild` on the shell re-checks the session on every in-shell navigation.
+`roleGuard` is a typed factory (`roleGuard(['ADMIN'])`) rather than reading untyped `route.data`.
+
+## ADR-015 — Lazy-loaded shell
+
+**Decision:** The shell route now uses `loadComponent` (updates ADR-004).
+**Why:** With login outside the shell, guests never need the sidenav, toolbar, or menu code.
+That keeps the initial bundle within the 500 kB budget (460 kB raw, about 115 kB transferred).
+
+## ADR-016 — Error handling split between interceptor and callers
+
+**Decision:** `errorInterceptor` handles 401 (end session, redirect to login with
+`reason=expired` and `returnUrl`) and 403 (keep session, show a snackbar), then re-throws.
+Auth endpoints opt out through the `SKIP_SESSION_HANDLING` `HttpContextToken`.
+**Why:** Without the opt-out, a failed login or restore would trigger a redirect (a loop risk).
+`handleUnauthorized()` is idempotent, so parallel 401s redirect only once. `returnUrl` is
+validated (`safeReturnUrl`) to prevent open redirects.

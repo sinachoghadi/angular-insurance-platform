@@ -2,7 +2,7 @@
 
 ## Phase 1 — Project Setup & Architecture ✅
 
-**Status:** Complete (awaiting approval for Phase 2)
+**Status:** Complete
 
 ### Delivered
 
@@ -29,4 +29,48 @@
 ### Deferred
 
 - ESLint (`angular-eslint`) — planned in the architecture; to be added in a tooling step with approval.
-- Authentication, guards, interceptors, mock API, and all business features (Phase 2+).
+
+## Phase 2 — Authentication & Authorization ✅
+
+**Status:** Complete (awaiting approval for the next phase)
+
+### Delivered
+
+- Development-only mock API (`mock-api/`): login, logout, me, and admin-only `GET /users`.
+  It uses HttpOnly cookie sessions, scrypt password hashes, an XSRF token, 401/403 enforcement,
+  and session expiry.
+- Dev-server proxy (`proxy.conf.json`) so the API is same-origin.
+- `AuthApi` (HTTP) and a signal-based `AuthStore` (user, status, initialization, login
+  pending/error, computed role state, expiry timer).
+- Login page: typed reactive form, required and email validation, show/hide password,
+  loading state, invalid-credential alert, session-expired notice, demo account shortcuts,
+  `returnUrl` support with open-redirect protection.
+- Functional guards: `authGuard` (shell `canActivate` + `canActivateChild`), `guestGuard`
+  (login), and `roleGuard(['ADMIN'])` (Users).
+- Functional interceptors: `authInterceptor` (credentials for API URLs only) and
+  `errorInterceptor` (401 ends the session, 403 shows a permission message).
+- Access Denied page; role-aware navigation from a shared `ACCESS_RULES` map.
+- Header account menu with name, role, email, and Sign out.
+- Users page shows the admin-only user list from the API (read-only).
+- Shell is lazy-loaded, so guests download less code.
+
+### Quality gates
+
+- `ng build` (production): passes with no warnings. Initial bundle 460 kB raw, about 115 kB transferred.
+- `ng test`: 13 files, 85 tests passing.
+- `npm run test:api`: 13 tests passing.
+- Browser end-to-end check (headless Chrome) of all acceptance criteria, including refresh
+  restore, logout invalidation, agent direct-URL block, agent 403 from the API, and in-app 401
+  after the server lost the session.
+
+### Known limitations
+
+- Sessions are in memory: restarting the mock API signs everyone out.
+- Fixed session lifetime with no sliding renewal or "remember me".
+- No login rate limiting or account lockout.
+- `Secure` cookie flag is off in development (plain HTTP); required for any HTTPS deployment.
+- The API base URL is a single `API_BASE_URL` token (`/api`); a separately hosted API would also
+  need CORS with credentials and `SameSite=None; Secure` cookies.
+- Logout clears local state even if the server call fails; the server session then remains
+  valid until it expires.
+- User management actions (role assignment, activation) are not implemented yet.

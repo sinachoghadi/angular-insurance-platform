@@ -1,0 +1,28 @@
+.access-denied {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-block: var(--app-space-5);
+  text-align: center;
+}
+
+.access-denied__icon {
+  display: inline-grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background-color: var(--mat-sys-error-container);
+  color: var(--mat-sys-on-error-container);
+}
+
+.access-denied__title {
+  margin: var(--app-space-3) 0 var(--app-space-2);
+  font: var(--mat-sys-headline-small);
+}
+
+.access-denied__message {
+  max-width: 52ch;
+  margin: 0 0 var(--app-space-4);
+  color: var(--mat-sys-on-surface-variant);
+}

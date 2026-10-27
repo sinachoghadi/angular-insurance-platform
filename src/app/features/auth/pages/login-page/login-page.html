@@ -1,0 +1,121 @@
+<main class="login">
+  <div class="login__layout">
+    <section class="login__card" aria-labelledby="login-title">
+      <div class="login__brand">
+        <mat-icon class="login__logo">shield</mat-icon>
+        <span>{{ appName }}</span>
+      </div>
+
+      <h1 id="login-title" class="login__title">Sign in</h1>
+      <p class="login__subtitle">Access policies, claims, and operations.</p>
+
+      @if (authStore.loginError(); as error) {
+        <p class="login__message login__message--error" role="alert">
+          <mat-icon>error</mat-icon>
+          <span>{{ error }}</span>
+        </p>
+      } @else if (reason() === 'expired') {
+        <p class="login__message login__message--info" role="status">
+          <mat-icon>schedule</mat-icon>
+          <span>Your session has expired. Please sign in again.</span>
+        </p>
+      }
+
+      <form
+        class="login__form"
+        [formGroup]="form"
+        [attr.aria-busy]="authStore.loginPending()"
+        (ngSubmit)="submit()"
+        novalidate
+      >
+        <mat-form-field appearance="outline">
+          <mat-label>Email</mat-label>
+          <input
+            #emailInput
+            matInput
+            type="email"
+            formControlName="email"
+            autocomplete="username"
+            inputmode="email"
+            required
+          />
+          @if (form.controls.email.hasError('required')) {
+            <mat-error>Email is required.</mat-error>
+          } @else if (form.controls.email.hasError('email')) {
+            <mat-error>Enter a valid email address.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Password</mat-label>
+          <input
+            #passwordInput
+            matInput
+            formControlName="password"
+            autocomplete="current-password"
+            required
+            [type]="passwordVisible() ? 'text' : 'password'"
+          />
+          <button
+            matIconButton
+            matSuffix
+            type="button"
+            [attr.aria-label]="passwordVisible() ? 'Hide password' : 'Show password'"
+            [attr.aria-pressed]="passwordVisible()"
+            (click)="togglePasswordVisibility()"
+          >
+            <mat-icon>{{ passwordVisible() ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          @if (form.controls.password.hasError('required')) {
+            <mat-error>Password is required.</mat-error>
+          }
+        </mat-form-field>
+
+        <button
+          matButton="filled"
+          type="submit"
+          class="login__submit"
+          disabledInteractive
+          [disabled]="authStore.loginPending()"
+        >
+          @if (authStore.loginPending()) {
+            <mat-progress-spinner mode="indeterminate" diameter="20" aria-hidden="true" />
+            <span>Signing in…</span>
+          } @else {
+            <span>Sign in</span>
+          }
+        </button>
+      </form>
+    </section>
+
+    <aside class="login__demo" aria-labelledby="demo-title">
+      <h2 id="demo-title" class="login__demo-title">
+        <mat-icon>info</mat-icon>
+        Demo accounts
+      </h2>
+      <p class="login__demo-note">
+        Fictional credentials for local demonstration only. Never use them in production.
+      </p>
+      <ul class="login__demo-list">
+        @for (account of demoAccounts; track account.email) {
+          <li class="login__demo-item">
+            <div>
+              <strong>{{ account.label }}</strong>
+              <div class="login__demo-credentials">
+                {{ account.email }} · {{ account.password }}
+              </div>
+            </div>
+            <button
+              matButton="outlined"
+              type="button"
+              [attr.aria-label]="'Fill in the ' + account.label + ' demo account'"
+              (click)="useDemoAccount(account)"
+            >
+              Use
+            </button>
+          </li>
+        }
+      </ul>
+    </aside>
+  </div>
+</main>

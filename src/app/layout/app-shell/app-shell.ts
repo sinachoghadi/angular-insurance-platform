@@ -1,6 +1,7 @@
 import { Component, ElementRef, computed, inject, signal, viewChild } from '@angular/core';
 import { MatSidenav, MatSidenavContainer, MatSidenavContent } from '@angular/material/sidenav';
 import { RouterOutlet } from '@angular/router';
+import { AuthStore } from '../../core/auth/auth-store';
 import { APP_NAME } from '../../core/services/app-title-strategy';
 import { Viewport } from '../../core/services/viewport';
 import { Header } from '../header/header';
@@ -14,9 +15,16 @@ import { Sidebar } from '../sidebar/sidebar';
   templateUrl: './app-shell.html',
 })
 export class AppShell {
+  private readonly authStore = inject(AuthStore);
+
   protected readonly appName = APP_NAME;
-  protected readonly navItems = NAV_ITEMS;
   protected readonly navigationId = 'app-navigation';
+  protected readonly user = this.authStore.user;
+
+  /** Hiding items is a convenience only; route guards and the API enforce access. */
+  protected readonly navItems = computed(() =>
+    NAV_ITEMS.filter((item) => !item.roles || this.authStore.hasAnyRole(item.roles)),
+  );
 
   protected readonly isCompact = inject(Viewport).isCompact;
 
@@ -45,6 +53,10 @@ export class AppShell {
     if (this.isCompact()) {
       this.compactOpen.set(false);
     }
+  }
+
+  protected logout(): void {
+    this.authStore.logout().subscribe();
   }
 
   protected skipToContent(): void {

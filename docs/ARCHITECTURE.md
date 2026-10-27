@@ -56,6 +56,8 @@ src/app/
 │   │   └── models/
 │   ├── claims/
 │   ├── users/
+│   ├── auth/            (login page)
+│   ├── access-denied/
 │   └── not-found/
 ├── app.config.ts
 └── app.routes.ts
@@ -93,11 +95,16 @@ Avoid introducing NgRx until a clear architectural need exists.
 
 ### 5. API Design
 
+All endpoints are served under the `/api` prefix (for example `/api/auth/login`).
+
 **Authentication**
 
 - POST /auth/login
-- POST /auth/refresh
+- POST /auth/logout
 - GET /auth/me
+
+`POST /auth/refresh` is not needed: sessions are opaque HttpOnly cookies, not bearer tokens
+(see ADR-010).
 
 **Policies**
 
@@ -122,11 +129,16 @@ API responses should support typed DTOs, pagination metadata, and predictable er
 
 ### 6. Authentication & Authorization
 
-- Functional route guards.
-- HTTP interceptor for attaching access tokens.
-- Refresh-token handling where supported by the mock backend.
-- Role-based route and action permissions.
-- Session-expiration handling.
+- Functional route guards: `authGuard`, `guestGuard`, `roleGuard(roles)`.
+- `authInterceptor` sends the session cookie (`withCredentials`) to API requests only.
+- `errorInterceptor` ends the session on 401 and shows a permission message on 403.
+- HttpOnly session cookie with a fixed lifetime; no tokens are readable by JavaScript.
+- Double-submit XSRF token for mutating authenticated requests (Angular's built-in support).
+- Role-based route and navigation permissions from a single `ACCESS_RULES` map.
+- Session-expiration handling: client timer from `expiresIn`, plus 401 handling.
+
+Mock API: `mock-api/` (Node.js built-ins only, in-memory sessions), proxied from the dev
+server through `proxy.conf.json` so cookies stay same-origin.
 
 Client-side authorization is for UI behavior only. The mock backend must also enforce permissions on protected endpoints.
 

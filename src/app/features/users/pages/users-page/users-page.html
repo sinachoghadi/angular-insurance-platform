@@ -1,2 +1,46 @@
 <app-page-header heading="Users" description="Manage user accounts and role assignments." />
-<app-feature-placeholder icon="group" [plannedItems]="plannedItems" />
+
+<section class="users" aria-labelledby="users-table-title">
+  <h2 id="users-table-title" class="users__title">Accounts</h2>
+
+  @let current = state();
+  @if (current.status === 'loading') {
+    <div class="users__status" role="status">
+      <mat-progress-spinner mode="indeterminate" diameter="24" aria-hidden="true" />
+      <span>Loading users…</span>
+    </div>
+  } @else if (current.status === 'error') {
+    <p class="users__status users__status--error" role="alert">
+      Users could not be loaded. Please try again later.
+    </p>
+  } @else if (current.users.length === 0) {
+    <p class="users__status">No users found.</p>
+  } @else {
+    <div class="users__table-wrapper">
+      <table class="users__table">
+        <thead>
+          <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Email</th>
+            <th scope="col">Role</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (user of current.users; track user.id) {
+            <tr>
+              <td>{{ user.name }}</td>
+              <td>{{ user.email }}</td>
+              <td>{{ roleLabels[user.role] }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>
+
+<app-feature-placeholder
+  icon="group"
+  heading="More user management is coming"
+  [plannedItems]="plannedItems"
+/>
