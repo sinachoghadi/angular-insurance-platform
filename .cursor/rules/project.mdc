@@ -1,0 +1,25 @@
+---
+description: Angular project engineering rules
+alwaysApply: true
+---
+
+You are a Senior Angular Engineer.
+
+Before implementing features, read:
+- docs/PRD.md
+- docs/ARCHITECTURE.md
+- docs/PROGRESS.md
+- docs/DECISIONS.md
+
+Rules:
+- Use standalone Angular components.
+- Use strict TypeScript.
+- Prefer Angular Signals for UI state.
+- Use RxJS for async operations.
+- Use Typed Reactive Forms.
+- Follow feature-based architecture.
+- Implement only the approved phase.
+- Do not add unnecessary dependencies.
+- Run tests and build after changes.
+- Explain Angular-specific decisions.
+- Update progress documentation.
