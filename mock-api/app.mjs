@@ -3,6 +3,7 @@
 
 import { randomBytes, scryptSync, timingSafeEqual } from 'node:crypto';
 import { USERS, toUserDto } from './users.mjs';
+import { POLICIES, listPolicies } from './policies.mjs';
 
 export const SESSION_COOKIE = 'ins_session';
 export const XSRF_COOKIE = 'XSRF-TOKEN';
@@ -73,6 +74,10 @@ export function createApp({ sessionTtlMs = 30 * 60 * 1000, latencyMs = 0, now = 
 
   /** @type {Record<string, (req: import('node:http').IncomingMessage, res: import('node:http').ServerResponse) => Promise<void> | void>} */
   const routes = {
+    'GET /api/policies': (req, res) => {
+      const { user } = authorize(req);
+      sendJson(res, 200, listPolicies(new URL(req.url, 'http://localhost').searchParams, user));
+    },
     'POST /api/auth/login': async (req, res) => {
       const body = await readJson(req);
       const email = typeof body?.email === 'string' ? body.email.trim().toLowerCase() : null;
@@ -122,7 +127,19 @@ export function createApp({ sessionTtlMs = 30 * 60 * 1000, latencyMs = 0, now = 
     res.setHeader('X-Content-Type-Options', 'nosniff');
 
     const { pathname } = new URL(req.url ?? '/', 'http://localhost');
-    const handler = routes[`${req.method} ${pathname}`];
+    const detail = /^\/api\/policies\/[^/]+$/.test(pathname);
+    const handler =
+      routes[`${req.method} ${pathname}`] ??
+      (detail && req.method === 'GET'
+        ? (req, res) => {
+            const { user } = authorize(req);
+            const policy = POLICIES.find((p) => p.id === pathname.split('/').at(-1));
+            if (!policy) throw new HttpError(404, 'Policy not found.');
+            if (user.role !== 'ADMIN' && policy.agentId !== user.id)
+              throw new HttpError(403, 'This policy is assigned to another agent.');
+            sendJson(res, 200, policy);
+          }
+        : undefined);
 
     setTimeout(async () => {
       try {

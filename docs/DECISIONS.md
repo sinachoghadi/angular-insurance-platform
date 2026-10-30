@@ -1,5 +1,26 @@
 # Architecture Decision Log
 
+## ADR-017 — Read-only Policy Management with URL-owned state
+
+**Decision:** Implement listing and details only. Keep the existing cookie authentication
+and extend its Node mock API with 180 fictional policies. Authorization derives agent
+identity from the server session before filtering, sorting and pagination. Use stable
+ascending ID ties for deterministic pagination. Return only the requested page.
+
+**Client:** Keep API calls in `PolicyApi`, list signals/computed values in a page-scoped
+`PolicyStore`, and presentation in filter/table/status components. Use the URL as listing
+state, with validated query parsing, silent form restoration and `switchMap` cancellation.
+Details have their own route-scoped signal state. Use existing Angular 22 standalone,
+zoneless and default OnPush conventions. Prefer direct Material standalone imports.
+
+**Trade-offs:** The read-only API projection doubles as the UI model; no redundant DTO
+adapter is introduced. Agent names are provided by the policy API; Admin filter options
+reuse the existing authorized Users API. Premiums use USD; missing coverage limits and
+premium breakdowns are shown explicitly. The table uses a contained accessible scroll
+region on small viewports. No persistence, creation, editing or Claims work is included.
+
+See [Policy API](POLICY_API.md) for endpoint contracts and request/state behavior.
+
 ## ADR-001 — Standalone components, no NgModules
 
 **Decision:** All components are standalone; the app bootstraps with `bootstrapApplication` and an

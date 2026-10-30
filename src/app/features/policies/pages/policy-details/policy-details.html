@@ -1,0 +1,64 @@
+<a mat-button routerLink="/policies" [queryParams]="backQuery">← Back to Policies</a>
+<app-page-header
+  [heading]="policy()?.policyNumber ?? 'Policy details'"
+  description="Read-only policy record · Fictional demo data"
+/>
+@if (loading()) {
+  <mat-progress-bar mode="indeterminate" aria-label="Loading policy" />
+  <p role="status">Loading policy…</p>
+} @else if (error()) {
+  <section role="alert">
+    <h2>{{ error() }}</h2>
+    @if (retryable()) {
+      <button mat-flat-button (click)="retry()">Retry</button>
+    }
+  </section>
+} @else if (policy(); as p) {
+  <div class="details">
+    <section>
+      <h2>Policy information</h2>
+      <dl>
+        <dt>Policy number</dt>
+        <dd>{{ p.policyNumber }}</dd>
+        <dt>Status</dt>
+        <dd><app-policy-status-badge [status]="p.status" /></dd>
+        <dt>Assigned agent</dt>
+        <dd>{{ p.agentName }}</dd>
+        <dt>Agent ID</dt>
+        <dd>{{ p.agentId }}</dd>
+      </dl>
+    </section>
+    <section>
+      <h2>Customer information</h2>
+      <dl>
+        <dt>Customer</dt>
+        <dd>{{ p.customerName }}</dd>
+        <dt>National ID (fictional)</dt>
+        <dd>{{ p.customerNationalId }}</dd>
+      </dl>
+    </section>
+    <section>
+      <h2>Coverage and premium</h2>
+      <dl>
+        <dt>Insurance type</dt>
+        <dd>{{ p.insuranceType }}</dd>
+        <dt>Start date</dt>
+        <dd>{{ p.startDate | date: 'longDate' : 'UTC' }}</dd>
+        <dt>End date</dt>
+        <dd>{{ p.endDate | date: 'longDate' : 'UTC' }}</dd>
+        <dt>Total premium (USD)</dt>
+        <dd>{{ p.premium | currency: 'USD' }}</dd>
+      </dl>
+      <p>Coverage limits and premium breakdown are unavailable in this demo.</p>
+    </section>
+    <section>
+      <h2>Record history</h2>
+      <dl>
+        <dt>Created</dt>
+        <dd>{{ p.createdAt | date: 'medium' : 'UTC' }} UTC</dd>
+        <dt>Updated</dt>
+        <dd>{{ p.updatedAt | date: 'medium' : 'UTC' }} UTC</dd>
+      </dl>
+    </section>
+  </div>
+}

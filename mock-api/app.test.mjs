@@ -206,3 +206,94 @@ describe('routing', () => {
     assert.equal((await api.request('GET', '/auth/login')).status, 405);
   });
 });
+
+describe('Policy endpoints', () => {
+  it('requires a session on list and details', async () => {
+    const api = client();
+    assert.equal((await api.request('GET', '/policies')).status, 401);
+    assert.equal((await api.request('GET', '/policies/p-1001')).status, 401);
+  });
+  it('paginates all 180 records for admins and clamps invalid pages', async () => {
+    const api = client();
+    await api.login(ADMIN);
+    const first = (await api.request('GET', '/policies?pageSize=25&page=1')).body;
+    const second = (await api.request('GET', '/policies?pageSize=25&page=2')).body;
+    assert.equal(first.total, 180);
+    assert.equal(first.items.length, 25);
+    assert.equal(second.page, 2);
+    assert.ok(first.items.every((p) => !second.items.some((q) => q.id === p.id)));
+    const last = (await api.request('GET', '/policies?page=999&pageSize=50')).body;
+    assert.equal(last.page, 4);
+    assert.equal(last.items.length, 30);
+    const invalid = (await api.request('GET', '/policies?page=-1&pageSize=999')).body;
+    assert.equal(invalid.page, 1);
+    assert.equal(invalid.pageSize, 10);
+  });
+  it('derives agent scope from the session and ignores forged agentId', async () => {
+    const api = client();
+    await api.login(AGENT);
+    const result = (await api.request('GET', '/policies?agentId=u-1003&pageSize=50')).body;
+    assert.equal(result.total, 60);
+    assert.ok(result.items.every((p) => p.agentId === 'u-1002'));
+    assert.equal((await api.request('GET', '/policies/p-1002')).status, 403);
+    assert.equal((await api.request('GET', '/policies/p-1001')).status, 200);
+  });
+  it('combines filters before pagination and searches across all records', async () => {
+    const api = client();
+    await api.login(ADMIN);
+    const result = (
+      await api.request(
+        'GET',
+        '/policies?insuranceType=Life&status=ACTIVE&agentId=u-1002&startFrom=2025-01-01&startTo=2026-12-31',
+      )
+    ).body;
+    assert.ok(result.total > 0);
+    assert.ok(
+      result.items.every(
+        (p) =>
+          p.insuranceType === 'Life' &&
+          p.status === 'ACTIVE' &&
+          p.agentId === 'u-1002' &&
+          p.startDate >= '2025-01-01' &&
+          p.startDate <= '2026-12-31',
+      ),
+    );
+    for (const search of ['DEMO-000180', 'Jamie', 'INS-2026-00180']) {
+      const found = (await api.request('GET', `/policies?search=${search}`)).body;
+      assert.ok(found.total > 0);
+    }
+    assert.equal((await api.request('GET', '/policies?search=unfindable')).body.total, 0);
+  });
+  it('sorts globally in both directions with deterministic ties', async () => {
+    const api = client();
+    await api.login(ADMIN);
+    for (const field of ['premium', 'policyNumber', 'startDate', 'endDate', 'createdAt']) {
+      for (const direction of ['asc', 'desc']) {
+        const one = (
+          await api.request('GET', `/policies?sortBy=${field}&sortOrder=${direction}&pageSize=50`)
+        ).body;
+        const two = (
+          await api.request(
+            'GET',
+            `/policies?sortBy=${field}&sortOrder=${direction}&pageSize=50&page=2`,
+          )
+        ).body;
+        const items = [...one.items, ...two.items];
+        for (let i = 1; i < items.length; i++) {
+          assert.ok(
+            direction === 'asc'
+              ? items[i - 1][field] <= items[i][field]
+              : items[i - 1][field] >= items[i][field],
+          );
+          if (items[i - 1][field] === items[i][field]) assert.ok(items[i - 1].id < items[i].id);
+        }
+      }
+    }
+  });
+  it('loads admin details and returns 404 for missing IDs', async () => {
+    const api = client();
+    await api.login(ADMIN);
+    assert.equal((await api.request('GET', '/policies/p-1002')).body.id, 'p-1002');
+    assert.equal((await api.request('GET', '/policies/invalid')).status, 404);
+  });
+});

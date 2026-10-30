@@ -97,6 +97,12 @@ describe('App routing', () => {
       ['/claims', 'Claims'],
     ])('lazy-loads %s', async (url, expectedHeading) => {
       await navigateAs(ADMIN_USER, url);
+      if (url === '/policies') {
+        http.expectOne('/api/users').flush({ data: [ADMIN_USER] });
+        http
+          .expectOne((request) => request.url === '/api/policies')
+          .flush({ items: [], total: 0, page: 1, pageSize: 10 });
+      }
 
       expect(heading()).toBe(expectedHeading);
     });

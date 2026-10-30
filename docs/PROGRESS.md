@@ -1,5 +1,36 @@
 # Progress
 
+## Phase 3 — Policy Management listing and details
+
+**Status:** Implemented within the explicitly requested read-only scope. No next phase started.
+
+### Delivered
+
+- Typed policy and query models; 180 fictional records across five products/statuses.
+- Session-authorized `GET /api/policies` and `GET /api/policies/:id`.
+- Backend search, combined filters, stable sorting and actual server-side pagination.
+- Material table, status badges, paginator (10/25/50), responsive filter grid and contained
+  table scrolling; loading, empty and retryable-error states.
+- Debounced reactive search, request cancellation, page-scoped signals/computed state.
+- URL restoration on refresh and browser Back/Forward; detail links retain listing state.
+- Read-only details with customer, coverage dates, premium, agent and record timestamps;
+  invalid/missing IDs and forbidden access have distinct states.
+- API, store, query parser, debounce, rendering, routing/history and backend security tests.
+- Endpoint and Angular explanation: [POLICY_API.md](POLICY_API.md).
+
+### Quality gates and limits
+
+- Final Angular verification: 19 test files, 104 tests passed (`ng test --watch=false`).
+- Final backend verification: 19 tests passed (`node --test "mock-api/*.test.mjs"`).
+- `git diff --check`: passed.
+- Production build succeeds. Initial bundle is about 506 kB raw / 127 kB transferred,
+  slightly above the existing 500 kB warning budget; the budget has not been raised.
+- Production build needs network access for existing Google Fonts inlining.
+- No manual browser visual review is claimed; responsive layout is implemented with a
+  flexible filter grid and a bounded table scroll region.
+- All prior mock-session limitations remain. Detailed coverage/premium breakdown is
+  unavailable; creation, editing and Claims are deferred.
+
 ## Phase 1 — Project Setup & Architecture ✅
 
 **Status:** Complete

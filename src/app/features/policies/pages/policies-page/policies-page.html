@@ -1,2 +1,53 @@
-<app-page-header heading="Policies" description="Create, search, and manage insurance policies." />
-<app-feature-placeholder icon="description" [plannedItems]="plannedItems" />
+<app-page-header
+  heading="Policies"
+  description="Explore insurance policies, customers and coverage. Fictional demo data · Premiums in USD."
+/>
+<section class="panel" aria-label="Policy management" [attr.aria-busy]="store.loading()">
+  <app-policy-filters
+    [query]="store.query()"
+    [admin]="admin"
+    [agents]="agents()"
+    (change)="store.update($event)"
+    (clear)="store.clear()"
+  />
+  @if (agentError()) {
+    <p class="summary" role="status">
+      Agent options could not be loaded. Other filters remain available.
+    </p>
+  }
+  <div class="summary" aria-live="polite">
+    {{ store.result().total }} policies · {{ store.activeFilters() }} active filters
+  </div>
+  @if (store.loading()) {
+    <mat-progress-bar mode="indeterminate" aria-label="Loading policies" />
+    <p class="state" role="status">Loading policies…</p>
+  } @else if (store.error()) {
+    <div class="state" role="alert">
+      <h2>Unable to load policies</h2>
+      <p>Check your connection and try again.</p>
+      <button mat-flat-button (click)="store.retry()">Retry</button>
+    </div>
+  } @else if (store.empty()) {
+    <div class="state">
+      <h2>No policies found</h2>
+      <p>Try another search or clear your filters.</p>
+      <button mat-button (click)="store.clear()">Clear filters</button>
+    </div>
+  } @else {
+    <app-policy-table
+      [items]="store.result().items"
+      [query]="store.query()"
+      (sort)="sort($event)"
+    />
+  }
+  <mat-paginator
+    aria-label="Policy pagination"
+    [disabled]="store.loading()"
+    [length]="store.result().total"
+    [pageSize]="store.query().pageSize"
+    [pageIndex]="store.result().page - 1"
+    [pageSizeOptions]="[10, 25, 50]"
+    showFirstLastButtons
+    (page)="store.update({ page: $event.pageIndex + 1, pageSize: $event.pageSize }, false)"
+  />
+</section>
