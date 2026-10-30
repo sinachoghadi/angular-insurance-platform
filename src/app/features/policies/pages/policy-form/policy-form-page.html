@@ -40,7 +40,7 @@
     <mat-stepper
       [orientation]="viewport.isCompact() ? 'vertical' : 'horizontal'"
       [selectedIndex]="store.currentStep()"
-      (selectionChange)="store.currentStep.set($event.selectedIndex)"
+      (selectionChange)="store.setStep($event.selectedIndex)"
       [linear]="true"
     >
       <mat-step [stepControl]="store.form.controls.customer"
@@ -56,7 +56,7 @@
         <h2>Insurance product</h2>
         <app-product-form [group]="store.form.controls.product" [type]="store.selectedType()" />
         <div class="step-actions">
-          <button mat-button type="button" (click)="store.currentStep.set(0)">Back</button
+          <button mat-button type="button" (click)="store.setStep(0)">Back</button
           ><button mat-flat-button type="button" (click)="store.next()">Next: Coverage</button>
         </div></mat-step
       >
@@ -70,7 +70,7 @@
           [agents]="agents()"
         />
         <div class="step-actions">
-          <button mat-button type="button" (click)="store.currentStep.set(1)">Back</button
+          <button mat-button type="button" (click)="store.setStep(1)">Back</button
           ><button mat-flat-button type="button" (click)="store.next()">Next: Review</button>
         </div></mat-step
       >
@@ -87,7 +87,7 @@
           [agent]="agentName()"
         />
         <div class="step-actions">
-          <button mat-button type="button" (click)="store.currentStep.set(2)">Back</button
+          <button mat-button type="button" (click)="store.setStep(2)">Back</button
           ><button
             mat-flat-button
             type="button"

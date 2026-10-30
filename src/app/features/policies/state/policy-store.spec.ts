@@ -76,4 +76,35 @@ describe('PolicyStore', () => {
       pageSize: 25,
     });
   });
+  it('does not refetch the response when a clamped page is written back to the URL', () => {
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    request().flush({ items: [], total: 1, page: 1, pageSize: 25 });
+    expect(navigate).toHaveBeenCalled();
+    params.next(convertToParamMap({ page: 1, pageSize: 25, status: 'ACTIVE' }));
+    http.expectNone((r) => r.url === '/api/policies');
+    expect(store.query().page).toBe(1);
+    store.retry();
+    request().flush({ items: [], total: 1, page: 1, pageSize: 25 });
+  });
+  it('prevents duplicate retry while loading and cleans up on destroy', () => {
+    const pending = request();
+    store.retry();
+    http.expectNone((r) => r.url === '/api/policies');
+    TestBed.resetTestingModule();
+    expect(pending.cancelled).toBe(true);
+    expect(store.loading()).toBe(false);
+    expect(store.requestStatus()).toBe('idle');
+    expect('set' in store.query).toBe(false);
+  });
+  it('merges rapid filter commands before router navigation commits', () => {
+    request().flush({ items: [], total: 100, page: 2, pageSize: 25 });
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    store.update({ status: 'PENDING' });
+    store.update({ insuranceType: 'Life' });
+    expect(navigate.mock.calls[1][1]?.queryParams).toMatchObject({
+      status: 'PENDING',
+      insuranceType: 'Life',
+      page: 1,
+    });
+  });
 });

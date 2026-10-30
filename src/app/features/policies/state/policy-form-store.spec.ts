@@ -71,7 +71,7 @@ describe('PolicyFormStore', () => {
     expect(store.currentStep()).toBe(1);
     store.next();
     expect(store.currentStep()).toBe(2);
-    store.currentStep.set(0);
+    store.setStep(0);
     expect(store.form.controls.product.controls.vehicle.controls.model.value).toBe('Demo Sedan');
   });
   it('saves partial drafts once, exposes status and restores by ID', () => {
@@ -127,6 +127,29 @@ describe('PolicyFormStore', () => {
     http.expectOne('/api/policies/p-2001').flush({ ...saved(), id: 'p-2001' });
     expect(store.selectedPolicy()?.id).toBe('p-2001');
     expect(store.loading()).toBe(false);
+  });
+  it('does not duplicate a pending restore and cancels it when initializing a new form', () => {
+    store.initialize('p-2000');
+    const pending = http.expectOne('/api/policies/p-2000');
+    store.initialize('p-2000');
+    http.expectNone('/api/policies/p-2000');
+    store.initialize(null);
+    expect(pending.cancelled).toBe(true);
+    expect(store.loading()).toBe(false);
+    expect(store.initialized()).toBe(true);
+    expect(store.loadRequestStatus()).toBe('idle');
+  });
+  it('cancels a write belonging to the previous form before restoring another draft', () => {
+    store.initialize('p-2000');
+    http.expectOne('/api/policies/p-2000').flush(saved());
+    store.form.controls.customer.controls.fullName.setValue('Updated draft');
+    store.save();
+    const old = http.expectOne('/api/policies/p-2000');
+    store.initialize('p-2001');
+    expect(old.cancelled).toBe(true);
+    expect(store.saving()).toBe(false);
+    http.expectOne('/api/policies/p-2001').flush({ ...saved(), id: 'p-2001' });
+    expect(store.selectedPolicy()?.id).toBe('p-2001');
   });
   it('validates before submit, saves then submits exactly once and navigates to details', () => {
     store.submit();

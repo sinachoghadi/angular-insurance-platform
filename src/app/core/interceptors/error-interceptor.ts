@@ -4,7 +4,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { catchError, throwError } from 'rxjs';
 import { AuthStore } from '../auth/auth-store';
 import { API_BASE_URL, isApiUrl } from '../services/api-config';
-import { SKIP_SESSION_HANDLING } from './http-context';
+import { SKIP_SESSION_HANDLING, HANDLE_API_ERROR_LOCALLY } from './http-context';
 
 export const FORBIDDEN_MESSAGE = 'You do not have permission to perform this action.';
 
@@ -26,7 +26,7 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
       if (error instanceof HttpErrorResponse) {
         if (error.status === 401) {
           authStore.handleUnauthorized();
-        } else if (error.status === 403) {
+        } else if (error.status === 403 && !req.context.get(HANDLE_API_ERROR_LOCALLY)) {
           snackBar.open(FORBIDDEN_MESSAGE, 'Dismiss', { duration: 6000 });
         }
       }

@@ -53,7 +53,14 @@ describe('ClaimCreateStore', () => {
     expect(store.form.controls.estimatedAmount.invalid).toBe(true);
     store.form.controls.description.setValue('   ');
     expect(store.form.controls.description.invalid).toBe(true);
-    store.selectedPolicy.set({ ...ACTIVE_POLICY, status: 'DRAFT' });
+    store.policyPageChange(2);
+    policyRequest().flush({
+      items: [{ ...ACTIVE_POLICY, status: 'DRAFT' }],
+      total: 1,
+      page: 2,
+      pageSize: 10,
+    });
+    store.select(ACTIVE_POLICY.id);
     store.form.updateValueAndValidity();
     expect(store.form.hasError('policy')).toBe(true);
   });

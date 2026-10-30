@@ -93,6 +93,16 @@ defined in `layout/navigation.ts`.
 
 Avoid introducing NgRx until a clear architectural need exists.
 
+Feature stores keep writable signals private and expose readonly/computed state with
+explicit commands. `core/http/request-state.ts` standardizes per-operation HTTP lifecycle
+(idle/loading/success/error), cancellation-safe loading and normalized technical failures.
+Pages own scoped stores; APIs stay root-scoped and stateless. Auth session state remains
+root-scoped, with cold, shared in-flight HTTP and invalidation on logout/expiry.
+
+Features render their errors locally via `HANDLE_API_ERROR_LOCALLY`; this suppresses the
+global 403 toast without skipping global 401 session expiry. Safe error messages retain
+original causes separately for debugging. See [state audit](STATE_ARCHITECTURE.md).
+
 ### 5. API Design
 
 All endpoints are served under the `/api` prefix (for example `/api/auth/login`).

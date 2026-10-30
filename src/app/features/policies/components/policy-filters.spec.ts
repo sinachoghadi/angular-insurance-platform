@@ -2,6 +2,21 @@ import { TestBed } from '@angular/core/testing';
 import { PolicyFilters } from './policy-filters';
 import { DEFAULT_QUERY } from '../models/policy-query';
 describe('PolicyFilters', () => {
+  it('commits pending search together with a changed filter', async () => {
+    const fixture = TestBed.createComponent(PolicyFilters);
+    fixture.componentRef.setInput('query', DEFAULT_QUERY);
+    await fixture.whenStable();
+    const change = vi.fn();
+    fixture.componentInstance.change.subscribe(change);
+    vi.useFakeTimers();
+    fixture.componentInstance.form.controls.search.setValue('Demo');
+    fixture.componentInstance.form.controls.status.setValue('ACTIVE');
+    expect(change).toHaveBeenCalledWith({ status: 'ACTIVE', search: 'Demo' });
+    fixture.componentRef.setInput('query', { ...DEFAULT_QUERY, status: 'ACTIVE', search: 'Demo' });
+    fixture.detectChanges();
+    await vi.advanceTimersByTimeAsync(300);
+    expect(change).toHaveBeenCalledTimes(1);
+  });
   afterEach(() => vi.useRealTimers());
   async function setup() {
     const fixture = TestBed.createComponent(PolicyFilters);

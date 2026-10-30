@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { API_BASE_URL } from '../../../core/services/api-config';
+import { featureHttpContext } from '../../../core/http/feature-http-context';
 import { User } from '../../../shared/models/user';
 
 interface UsersResponse {
@@ -15,6 +16,8 @@ export class UsersApi {
 
   /** ADMIN only; the API answers 403 for other roles. */
   getUsers(): Observable<readonly User[]> {
-    return this.http.get<UsersResponse>(this.baseUrl).pipe(map((response) => response.data));
+    return this.http
+      .get<UsersResponse>(this.baseUrl, { context: featureHttpContext() })
+      .pipe(map((response) => response.data));
   }
 }

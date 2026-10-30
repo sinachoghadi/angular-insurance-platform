@@ -2,6 +2,7 @@ import { computed, inject, Injectable, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
+  EMPTY,
   Subject,
   catchError,
   combineLatest,
@@ -10,24 +11,33 @@ import {
   of,
   startWith,
   switchMap,
-  tap,
 } from 'rxjs';
+import { createRequestState } from '../../../core/http/request-state';
 import { AuthStore } from '../../../core/auth/auth-store';
 import { PolicyApi } from '../data-access/policy-api';
 import { PolicyPage } from '../models/policy';
-import { DEFAULT_QUERY, parseQuery, PolicyQuery } from '../models/policy-query';
+import { PolicyQuery, DEFAULT_QUERY, parseQuery } from '../models/policy-query';
 @Injectable()
 export class PolicyStore {
   private readonly api = inject(PolicyApi);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly auth = inject(AuthStore);
-  private readonly retry$ = new Subject<void>();
-  readonly query = signal<PolicyQuery>(DEFAULT_QUERY);
-  readonly result = signal<PolicyPage>({ items: [], total: 0, page: 1, pageSize: 10 });
-  readonly loading = signal(false);
-  readonly error = signal(false);
-  readonly empty = computed(() => !this.loading() && !this.error() && this.result().total === 0);
+  private readonly request = createRequestState();
+  private readonly retry$ = new Subject<number>();
+  private retryEpoch = 0;
+  private settledKey = '';
+  private settledEpoch = -1;
+  private pendingQuery: PolicyQuery | null = null;
+  private readonly queryState = signal<PolicyQuery>(DEFAULT_QUERY);
+  readonly query = this.queryState.asReadonly();
+  private readonly resultState = signal<PolicyPage>({ items: [], total: 0, page: 1, pageSize: 10 });
+  readonly result = this.resultState.asReadonly();
+  readonly requestStatus = this.request.status;
+  readonly loading = this.request.loading;
+  readonly failure = this.request.error;
+  readonly error = computed(() => this.failure() !== null);
+  readonly empty = computed(() => !this.loading() && !this.error() && !this.result().total);
   readonly activeFilters = computed(() => {
     const q = this.query();
     return [q.search, q.insuranceType, q.status, q.agentId, q.startFrom, q.startTo].filter(Boolean)
@@ -39,40 +49,60 @@ export class PolicyStore {
         map((p) => parseQuery(p, this.auth.role() === 'ADMIN')),
         distinctUntilChanged((a, b) => JSON.stringify(a) === JSON.stringify(b)),
       ),
-      this.retry$.pipe(startWith(undefined)),
+      this.retry$.pipe(startWith(0)),
     ])
       .pipe(
-        tap(([query]) => {
-          this.query.set(query);
-        }),
-        switchMap(([query]) => {
-          this.loading.set(true);
-          this.error.set(false);
-          return this.api.list(query).pipe(
-            catchError(() => {
-              this.error.set(true);
-              return of(null);
-            }),
+        switchMap(([query, epoch]) => {
+          this.queryState.set(query);
+          // A server-clamped page replaces the URL but already has a complete response.
+          if (
+            this.requestStatus() === 'success' &&
+            JSON.stringify(query) === this.settledKey &&
+            epoch === this.settledEpoch
+          )
+            return EMPTY;
+          return this.request.track(this.api.list(query)).pipe(
+            map((result) => ({ result, epoch, query })),
+            catchError(() => of(null)),
           );
         }),
         takeUntilDestroyed(),
       )
-      .subscribe((result) => {
-        this.loading.set(false);
-        if (result) {
-          this.result.set(result);
-          if (result.page !== this.query().page) this.update({ page: result.page }, false, true);
-        }
+      .subscribe((response) => {
+        if (!response) return;
+        const { result, epoch, query } = response;
+        this.resultState.set(result);
+        this.settledKey = JSON.stringify({ ...query, page: result.page });
+        this.settledEpoch = epoch;
+        if (result.page !== query.page) this.update({ page: result.page }, false, true);
       });
   }
-  update(patch: Partial<PolicyQuery>, reset = true, replaceUrl = false) {
-    const query = { ...this.query(), ...(reset ? { page: 1 } : {}), ...patch };
-    void this.router.navigate([], { relativeTo: this.route, queryParams: query, replaceUrl });
+  update(patch: Partial<PolicyQuery>, reset = true, replaceUrl = false): void {
+    const query = {
+      ...(this.pendingQuery ?? this.query()),
+      ...(reset ? { page: 1 } : {}),
+      ...patch,
+    };
+    this.pendingQuery = query;
+    void this.router
+      .navigate([], {
+        relativeTo: this.route,
+        queryParams: query,
+        replaceUrl,
+      })
+      .then(
+        () => {
+          if (this.pendingQuery === query) this.pendingQuery = null;
+        },
+        () => {
+          if (this.pendingQuery === query) this.pendingQuery = null;
+        },
+      );
   }
-  clear() {
+  clear(): void {
     this.update({ ...DEFAULT_QUERY });
   }
-  retry() {
-    this.retry$.next();
+  retry(): void {
+    if (!this.loading()) this.retry$.next(++this.retryEpoch);
   }
 }

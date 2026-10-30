@@ -73,6 +73,21 @@ describe('AuthStore', () => {
   });
 
   describe('login', () => {
+    it('starts only on subscription, shares concurrent submissions and cleans up cancellation', () => {
+      const operation = store.login(credentials);
+      expect(store.loginPending()).toBe(false);
+      http.expectNone('/api/auth/login');
+      const first = operation.subscribe(),
+        second = store.login(credentials).subscribe();
+      const request = http.expectOne('/api/auth/login');
+      expect(store.loginPending()).toBe(true);
+      first.unsubscribe();
+      expect(request.cancelled).toBe(false);
+      second.unsubscribe();
+      expect(request.cancelled).toBe(true);
+      expect(store.loginPending()).toBe(false);
+      expect(store.loginStatus()).toBe('idle');
+    });
     it('authenticates and exposes the user on success', async () => {
       const result = firstValueFrom(store.login(credentials));
 
@@ -109,6 +124,39 @@ describe('AuthStore', () => {
   });
 
   describe('logout', () => {
+    it('blocks a reentrant login from a canceled subscriber during logout', () => {
+      store.login(credentials).subscribe((valid) => {
+        if (!valid) store.login(credentials).subscribe();
+      });
+      const pending = http.expectOne('/api/auth/login');
+      store.logout().subscribe();
+      expect(pending.cancelled).toBe(true);
+      http.expectNone('/api/auth/login');
+      http.expectOne('/api/auth/logout').flush(null);
+      expect(store.isAuthenticated()).toBe(false);
+    });
+    it('cancels pending login so a late response cannot restore the session', async () => {
+      const login = firstValueFrom(store.login(credentials));
+      const pending = http.expectOne('/api/auth/login');
+      const done = firstValueFrom(store.logout());
+      expect(pending.cancelled).toBe(true);
+      expect(await login).toBe(false);
+      http.expectOne('/api/auth/logout').flush(null);
+      await done;
+      expect(store.user()).toBeNull();
+      expect(store.status()).toBe('unauthenticated');
+    });
+    it('cancels session restoration on logout and shares the logout operation', async () => {
+      const restore = firstValueFrom(store.ensureInitialized());
+      const pending = http.expectOne('/api/auth/me');
+      const first = firstValueFrom(store.logout()),
+        second = firstValueFrom(store.logout());
+      expect(pending.cancelled).toBe(true);
+      http.expectOne('/api/auth/logout').flush(null);
+      await Promise.all([first, second]);
+      expect(await restore).toBe('unauthenticated');
+      expect(router.navigateByUrl).toHaveBeenCalledTimes(1);
+    });
     it('invalidates the session on the server, clears state, and goes to login', async () => {
       await signIn();
 

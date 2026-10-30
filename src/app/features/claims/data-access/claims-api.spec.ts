@@ -4,6 +4,10 @@ import { TestBed } from '@angular/core/testing';
 import { ClaimsApi } from './claims-api';
 import { DEFAULT_CLAIM_QUERY } from '../models/claim-query';
 import { CLAIM, HISTORY, NOTE } from '../testing/claim-fixtures';
+import {
+  HANDLE_API_ERROR_LOCALLY,
+  SKIP_SESSION_HANDLING,
+} from '../../../core/interceptors/http-context';
 describe('ClaimsApi', () => {
   let api: ClaimsApi, http: HttpTestingController;
   beforeEach(() => {
@@ -30,6 +34,8 @@ describe('ClaimsApi', () => {
     const next = vi.fn();
     api.list(query).subscribe(next);
     const req = http.expectOne((r) => r.url === '/api/claims');
+    expect(req.request.context.get(HANDLE_API_ERROR_LOCALLY)).toBe(true);
+    expect(req.request.context.get(SKIP_SESSION_HANDLING)).toBe(false);
     for (const [key, value] of Object.entries(query))
       expect(req.request.params.get(key)).toBe(String(value));
     const page = { items: [CLAIM], total: 90, page: 2, pageSize: 25 };

@@ -1,5 +1,31 @@
 # Progress
 
+## Phase 6 — State Management and API Architecture Standardization
+
+**Status:** Architectural improvements implemented; no new business phase started.
+
+### Delivered
+
+- Concrete prioritized audit and conventions in [STATE_ARCHITECTURE.md](STATE_ARCHITECTURE.md).
+- Private writable/read-only public feature state and explicit step commands.
+- Operation-local idle/loading/success/error lifecycle, cancellation-safe finalization,
+  safe normalized errors and original technical causes for debugging.
+- Cold, shared Auth requests with logout/expiry invalidation and concurrency protection.
+- Duplicate retry/canonical-page request prevention; rapid independent filter command merging.
+- Stale read/mutation protection, scoped Policy Details store and store-owned Agent lookup.
+- Typed API return contracts and local 403 ownership while retaining global 401 handling.
+- Regression tests for lifecycle, auth races, cleanup, rapid filters, URL/form sync and mappings.
+
+### Verification / remaining limits
+
+- Final Angular verification: 33 test files, 180 tests passed (`ng test --watch=false`).
+- Final backend regression verification: 36 tests passed (`node --test "mock-api/*.test.mjs"`).
+- Production build succeeds: initial 511.79 kB raw / about 130.54 kB transferred;
+  existing 500 kB warning exceeded by 11.79 kB. Budgets unchanged.
+- `git diff --check`: passed.
+- Existing mock-backend security/contracts retained; no backend code changed.
+- Initial bundle warning remains; budget unchanged. No manual visual browser review claimed.
+
 ## Phase 5 — Claims Management
 
 **Status:** Implemented in the requested scope; no next phase started.

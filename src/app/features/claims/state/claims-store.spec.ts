@@ -99,4 +99,31 @@ describe('ClaimsStore and query restoration', () => {
       ),
     ).toEqual(DEFAULT_CLAIM_QUERY);
   });
+  it('does not issue a second GET for a server-clamped URL and preserves manual retry', () => {
+    vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    request().flush({ items: [], total: 1, page: 1, pageSize: 25 });
+    params.next(
+      convertToParamMap({
+        page: 1,
+        pageSize: 25,
+        status: 'APPROVED',
+        sortBy: 'estimatedAmount',
+        sortOrder: 'asc',
+      }),
+    );
+    http.expectNone((r) => r.url === '/api/claims');
+    store.retry();
+    request().flush({ items: [], total: 1, page: 1, pageSize: 25 });
+  });
+  it('merges rapid independent filters before URL commit', () => {
+    request().flush({ items: [], total: 90, page: 2, pageSize: 25 });
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    store.update({ status: 'REJECTED' });
+    store.update({ claimType: 'Fire' });
+    expect(navigate.mock.calls[1][1]?.queryParams).toMatchObject({
+      status: 'REJECTED',
+      claimType: 'Fire',
+      page: 1,
+    });
+  });
 });

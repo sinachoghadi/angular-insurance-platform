@@ -1,4 +1,4 @@
-import { Component, DestroyRef, HostListener, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, HostListener, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatButton } from '@angular/material/button';
@@ -7,9 +7,8 @@ import { MatProgressBar } from '@angular/material/progress-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import { Viewport } from '../../../../core/services/viewport';
-import { User } from '../../../../shared/models/user';
 import { PageHeader } from '../../../../shared/components/page-header/page-header';
-import { UsersApi } from '../../../users/data-access/users-api';
+import { distinctUntilChanged, map } from 'rxjs';
 import { CustomerForm } from '../../components/customer-form';
 import { ProductForm } from '../../components/product-form';
 import { CoverageForm } from '../../components/coverage-form';
@@ -43,35 +42,24 @@ export class PolicyFormPage {
   private readonly route = inject(ActivatedRoute);
   private readonly dialog = inject(MatDialog);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly usersApi = inject(UsersApi);
-  readonly agents = signal<readonly User[]>([]);
-  readonly agentError = signal(false);
-  readonly agentName = computed(
-    () =>
-      this.agents().find((a) => a.id === this.store.snapshot().agentId)?.name ??
-      this.store.selectedPolicy()?.agentName ??
-      'Your agent account',
-  );
-  private readonly id =
-    this.route.snapshot.paramMap.get('id') ?? this.route.snapshot.queryParamMap.get('draft');
+  readonly agents = this.store.agents;
+  readonly agentError = this.store.agentError;
+  readonly agentName = this.store.agentName;
+  private id: string | null = null;
   constructor() {
-    this.store.initialize(this.id);
-    if (this.store.admin) this.loadAgents();
+    this.route.paramMap
+      .pipe(
+        map((params) => params.get('id') ?? this.route.snapshot.queryParamMap.get('draft')),
+        distinctUntilChanged(),
+        takeUntilDestroyed(),
+      )
+      .subscribe((id) => {
+        this.id = id;
+        this.store.initialize(id);
+      });
   }
   loadAgents() {
-    this.agentError.set(false);
-    this.usersApi
-      .getUsers()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (users) => {
-          const agents = users.filter((u) => u.role === 'AGENT');
-          this.agents.set(agents);
-          if (agents[0]) this.store.setDefaultAgent(agents[0].id);
-          else this.agentError.set(true);
-        },
-        error: () => this.agentError.set(true),
-      });
+    this.store.loadAgents();
   }
   retry() {
     this.store.initialize(this.id);

@@ -10,7 +10,7 @@ import { UsersApi } from '../../data-access/users-api';
 
 type UsersState =
   | { readonly status: 'loading' }
-  | { readonly status: 'loaded'; readonly users: readonly User[] }
+  | { readonly status: 'success'; readonly users: readonly User[] }
   | { readonly status: 'error' };
 
 const LOADING: UsersState = { status: 'loading' };
@@ -28,7 +28,7 @@ export class UsersPage {
     inject(UsersApi)
       .getUsers()
       .pipe(
-        map((users): UsersState => ({ status: 'loaded', users })),
+        map((users): UsersState => ({ status: 'success', users })),
         catchError(() => of<UsersState>({ status: 'error' })),
       ),
     { initialValue: LOADING },

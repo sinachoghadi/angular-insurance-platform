@@ -12,7 +12,7 @@ import { firstValueFrom } from 'rxjs';
 import { AuthStore } from '../auth/auth-store';
 import { FORBIDDEN, UNAUTHORIZED } from '../auth/testing/auth-fixtures';
 import { FORBIDDEN_MESSAGE, errorInterceptor } from './error-interceptor';
-import { SKIP_SESSION_HANDLING } from './http-context';
+import { SKIP_SESSION_HANDLING, HANDLE_API_ERROR_LOCALLY } from './http-context';
 
 describe('errorInterceptor', () => {
   let http: HttpClient;
@@ -89,5 +89,13 @@ describe('errorInterceptor', () => {
 
     expect(authStore.handleUnauthorized).not.toHaveBeenCalled();
     expect(snackBar.open).not.toHaveBeenCalled();
+  });
+  it('avoids duplicate feature error notifications without skipping session expiry', async () => {
+    const context = new HttpContext().set(HANDLE_API_ERROR_LOCALLY, true);
+    await failWith('/api/policies', FORBIDDEN, context);
+    expect(snackBar.open).not.toHaveBeenCalled();
+    expect(authStore.handleUnauthorized).not.toHaveBeenCalled();
+    await failWith('/api/policies', UNAUTHORIZED, context);
+    expect(authStore.handleUnauthorized).toHaveBeenCalledOnce();
   });
 });

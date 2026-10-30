@@ -110,7 +110,9 @@ export class PolicyFilters {
     for (const key of ['insuranceType', 'status', 'agentId', 'startFrom', 'startTo'] as const) {
       this.form.controls[key].valueChanges
         .pipe(takeUntilDestroyed(destroyRef))
-        .subscribe((value) => this.change.emit({ [key]: value }));
+        .subscribe((value) =>
+          this.change.emit({ [key]: value, search: this.form.controls.search.value.trim() }),
+        );
     }
   }
 }

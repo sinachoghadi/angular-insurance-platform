@@ -119,7 +119,7 @@ describe('ClaimDetailsStore', () => {
     params.next(convertToParamMap({ id: 'c-1002' }));
     flushLoad(true, 'c-1002');
     old.flush({ ...CLAIM, status: 'UNDER_REVIEW', version: 2 });
-    http.expectOne('/api/claims/c-1001/history').flush({ items: [HISTORY] });
+    http.expectNone('/api/claims/c-1001/history');
     expect(store.claim()?.id).toBe('c-1002');
     expect(store.claim()?.status).toBe('SUBMITTED');
     expect(store.history()[0].claimId).toBe('c-1002');

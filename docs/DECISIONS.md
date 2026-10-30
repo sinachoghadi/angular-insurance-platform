@@ -1,5 +1,26 @@
 # Architecture Decision Log
 
+## ADR-020 — Readonly feature state and operation-local HTTP lifecycle
+
+**Decision:** Standardize state boundaries and request lifecycle after the concrete audit
+in [STATE_ARCHITECTURE.md](STATE_ARCHITECTURE.md). Keep private writable signals, readonly
+public state and explicit commands. Use a small function for HTTP status/error/loading,
+with generation-safe finalization; leave data, cancellation and business rules in features.
+No generic repository or global state framework was introduced.
+
+**Correctness:** Make Auth requests cold/single-flight, cancel stale identity requests on
+logout and retain existing guards/expiry/security semantics. Coalesce rapid filter commands
+until URL navigation settles, avoid a redundant GET after canonical page correction, and
+ignore/cancel reads/writes belonging to an older page/form context. Move Policy Details
+HTTP and Policy Form agent lookup into scoped stores. Product activation runs only on
+product changes rather than every keystroke.
+
+**Errors:** Normalize safe messages and retain original causes separately. Feature API
+requests opt out of the duplicate global 403 toast only; 401 handling remains global.
+Preserve auth endpoint self-handling. Return explicitly typed Observables from APIs.
+No automatic authentication/authorization retry, backend contract change, scope expansion,
+budget increase or new business phase is included.
+
 ## ADR-019 — Claims workflow with policy-derived access and Admin-only notes
 
 **Decision:** Implement Claims listing/creation/details, public status history and internal
