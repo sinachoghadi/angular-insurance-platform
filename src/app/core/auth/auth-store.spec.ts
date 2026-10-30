@@ -43,6 +43,19 @@ describe('AuthStore', () => {
   });
 
   describe('session restoration', () => {
+    it('cancels an obsolete restore when login begins and lets concurrent guards await login', async () => {
+      const old = firstValueFrom(store.ensureInitialized());
+      const restore = http.expectOne('/api/auth/me');
+      const login = firstValueFrom(store.login(credentials));
+      expect(restore.cancelled).toBe(true);
+      const guard = firstValueFrom(store.ensureInitialized());
+      http.expectNone('/api/auth/me');
+      http.expectOne('/api/auth/login').flush(sessionFor(ADMIN_USER));
+      expect(await login).toBe(true);
+      expect(await guard).toBe('authenticated');
+      await old;
+      expect(store.user()).toEqual(ADMIN_USER);
+    });
     it('restores an existing session from GET /auth/me', async () => {
       const status = firstValueFrom(store.ensureInitialized());
       http.expectOne({ method: 'GET', url: '/api/auth/me' }).flush(sessionFor(AGENT_USER));

@@ -33,6 +33,11 @@ describe('ClaimsPage', () => {
       CLAIM.claimNumber,
     );
     expect(harness.routeNativeElement?.querySelector('tbody')?.textContent).toContain('$1,000.00');
+    expect(
+      harness.routeNativeElement?.querySelector(
+        '[aria-label="View claim ' + CLAIM.claimNumber + '"]',
+      ),
+    ).not.toBeNull();
     expect(harness.routeNativeElement?.querySelector('a[href^="/claims/c-1001"]')).not.toBeNull();
   });
   it('shows a retryable error then an empty state', () => {

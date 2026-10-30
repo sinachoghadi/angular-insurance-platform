@@ -9,7 +9,7 @@
 @if (store.success()) {
   <p role="status">Claim submitted successfully. Opening details…</p>
 }
-<form [formGroup]="store.form" (ngSubmit)="store.submit()">
+<form [formGroup]="store.form" (ngSubmit)="store.submit()" [attr.aria-busy]="store.saving()">
   <div
     class="panel"
     [attr.inert]="store.saving() || store.uncertain() || store.success() ? '' : null"
@@ -20,6 +20,7 @@
       ><input matInput [formControl]="store.search" placeholder="Policy number or customer"
     /></mat-form-field>
     @if (store.policyLoading()) {
+      <p role="status" class="visually-hidden">Loading eligible policies…</p>
       <mat-progress-bar mode="indeterminate" aria-label="Loading eligible policies" />
     }
     @if (store.policyError()) {
@@ -101,6 +102,7 @@
     ><a mat-button routerLink="/claims">Cancel</a>
   </div>
   @if (store.saving()) {
+    <p role="status" class="visually-hidden">Submitting claim…</p>
     <mat-progress-bar mode="indeterminate" aria-label="Submitting claim" />
   }
 </form>

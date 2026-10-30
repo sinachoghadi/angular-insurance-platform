@@ -67,6 +67,15 @@ describe('errorInterceptor', () => {
     expect(authStore.handleUnauthorized).not.toHaveBeenCalled();
     expect(snackBar.open).toHaveBeenCalledWith(FORBIDDEN_MESSAGE, 'Dismiss', expect.any(Object));
   });
+  it('preserves the original HTTP error if a permission toast cannot be displayed', async () => {
+    snackBar.open.mockImplementationOnce(() => {
+      throw new Error('Notification renderer failed');
+    });
+    const error = await failWith('/api/users', FORBIDDEN);
+    expect(error.status).toBe(403);
+    expect(error.error).toEqual({ message: 'error' });
+    expect(authStore.handleUnauthorized).not.toHaveBeenCalled();
+  });
 
   it('leaves self-handled auth requests to their caller', async () => {
     const context = new HttpContext().set(SKIP_SESSION_HANDLING, true);

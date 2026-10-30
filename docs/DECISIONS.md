@@ -1,5 +1,23 @@
 # Architecture Decision Log
 
+## ADR-021 — Isolated browser quality gates and measured startup optimization
+
+**Decision:** Use Playwright against production build output with one temporary real
+mock API/data directory per test. Preserve actual cookie/XSRF behavior through a local
+request forwarder; do not expose a reset endpoint. Disable retries and external page
+traffic. Add V8 coverage, axe checks, explicit E2E typechecking and npm-lockfile CI.
+
+**Performance:** Dynamically import Material snackbar only for globally owned 403s.
+Capture Injector inside the synchronous injection context and resolve MatSnackBar
+after import; preserve the original HTTP error if notification loading fails. This
+removes verified eager overlay code without altering feature error ownership or 401s.
+Self-host fonts for reproducible builds/browser tests. Keep existing budgets unchanged.
+
+**Boundaries:** Preview is a local smoke server, not production hosting. Coverage is
+evidence rather than an arbitrary threshold. CI configuration is distinct from a
+verified remote run. See QUALITY_REPORT.md for measured payload and test results;
+no runtime speed or complete WCAG compliance claim is made.
+
 ## ADR-020 — Readonly feature state and operation-local HTTP lifecycle
 
 **Decision:** Standardize state boundaries and request lifecycle after the concrete audit
