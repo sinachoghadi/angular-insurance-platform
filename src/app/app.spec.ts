@@ -44,7 +44,7 @@ describe('App routing', () => {
   /** Navigates while answering the initial session-restore request. */
   async function navigateAs(user: User | null, url: string): Promise<void> {
     const navigation = harness.navigateByUrl(url);
-    const restore = await vi.waitFor(() => http.expectOne('/api/auth/me'));
+    const restore = await vi.waitFor(() => http.expectOne('/api/auth/me'), { timeout: 5000 });
     if (user) {
       restore.flush(sessionFor(user));
     } else {

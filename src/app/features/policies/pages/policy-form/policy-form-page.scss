@@ -1,0 +1,53 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+.workflow {
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.status-bar,
+.draft-actions,
+.step-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-block: 20px;
+}
+.status-bar {
+  justify-content: space-between;
+}
+.step-actions {
+  margin-top: 16px;
+}
+.draft-actions {
+  position: sticky;
+  bottom: 0;
+  background: var(--mat-sys-surface);
+  padding: 16px;
+  border-radius: 12px;
+  margin-top: 16px;
+  box-shadow: 0 2px 12px #0000000d;
+}
+.error {
+  color: var(--mat-sys-error);
+  padding: 16px;
+  background: var(--mat-sys-error-container);
+  border-radius: 12px;
+  margin-block: 16px;
+}
+h2 {
+  font-size: 20px;
+  margin-block: 20px;
+}
+@media (max-width: 600px) {
+  .status-bar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .draft-actions {
+    position: static;
+  }
+}

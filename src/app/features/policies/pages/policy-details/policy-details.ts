@@ -12,6 +12,7 @@ import { Policy } from '../../models/policy';
 import { parseQuery } from '../../models/policy-query';
 import { AuthStore } from '../../../../core/auth/auth-store';
 import { PolicyStatusBadge } from '../../components/policy-status-badge';
+import { PolicyReview } from '../../components/policy-review';
 @Component({
   selector: 'app-policy-details',
   imports: [
@@ -22,6 +23,7 @@ import { PolicyStatusBadge } from '../../components/policy-status-badge';
     MatProgressBar,
     PageHeader,
     PolicyStatusBadge,
+    PolicyReview,
   ],
   templateUrl: './policy-details.html',
   styleUrl: './policy-details.scss',
@@ -47,7 +49,7 @@ export class PolicyDetails {
           this.loading.set(true);
           this.retryable.set(false);
           const id = params.get('id') ?? '';
-          if (!/^p-\d+$/.test(id)) {
+          if (!/^p-[a-zA-Z0-9-]{1,64}$/.test(id)) {
             this.error.set('Policy not found.');
             return of(null);
           }

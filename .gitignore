@@ -8,6 +8,7 @@
 
 # Node
 /node_modules
+/mock-api/.data/
 npm-debug.log
 yarn-error.log
 

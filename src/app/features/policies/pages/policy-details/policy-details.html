@@ -14,6 +14,15 @@
     }
   </section>
 } @else if (policy(); as p) {
+  @if (p.status === 'DRAFT') {
+    <a mat-flat-button [routerLink]="['/policies', p.id, 'edit']">Continue Draft</a>
+  }
+  @if (p.formData; as data) {
+    <section>
+      <h2>Policy application</h2>
+      <app-policy-review [data]="data" [premium]="p.premium" [agent]="p.agentName" />
+    </section>
+  }
   <div class="details">
     <section>
       <h2>Policy information</h2>

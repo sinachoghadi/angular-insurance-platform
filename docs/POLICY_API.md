@@ -44,7 +44,8 @@ because this API already supplies the UI projection.
 Both endpoints return 401 without a valid session. Admins can read all records; agents
 can read only records whose `agentId` matches the user resolved from the server session.
 Detail requests for another agent's record return 403; missing or malformed IDs return
-404. Errors retain the existing `{ status, message }` structure. No write endpoints exist.
+404. Errors retain the existing `{ status, message }` structure. Phase 4 adds the draft
+write endpoints documented in [Policy Creation](POLICY_CREATION.md).
 
 ## Client behavior
 
@@ -63,10 +64,11 @@ Detail requests for another agent's record return 403; missing or malformed IDs 
 
 ## Limits
 
-This is an in-memory development backend, not a persistent production service. Coverage
-limits and premium breakdowns are unavailable and explicitly labeled in details. Creation,
-editing and Claims remain outside this phase. Production still requires deployed backend
-authorization and normal production hardening. Google Fonts inlining requires network
+This is a development backend, not a production service. Phase 4 adds file-backed draft
+persistence, creation/editing and product-specific details; see [Policy Creation](POLICY_CREATION.md).
+Legacy seed records do not contain full application data. Claims remain outside this phase.
+Production still requires a database, deployed backend authorization and normal production
+hardening. Google Fonts inlining requires network
 access during the production build. The initial bundle currently exceeds the existing
 500 kB warning budget slightly; the 1 MB error budget is unchanged.
 

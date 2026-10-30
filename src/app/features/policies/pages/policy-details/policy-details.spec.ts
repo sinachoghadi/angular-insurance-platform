@@ -24,23 +24,21 @@ describe('PolicyDetails', () => {
   it('loads details with a pending indicator and retains list state in back navigation', async () => {
     await harness.navigateByUrl('/policies/p-1001?page=2&status=ACTIVE');
     expect(harness.routeNativeElement?.textContent).toContain('Loading policy');
-    http
-      .expectOne('/api/policies/p-1001')
-      .flush({
-        id: 'p-1001',
-        policyNumber: 'INS-001',
-        customerName: 'Demo Customer',
-        customerNationalId: 'DEMO-001',
-        insuranceType: 'Life',
-        premium: 200,
-        startDate: '2025-01-01',
-        endDate: '2026-01-01',
-        status: 'ACTIVE',
-        agentId: 'u-1002',
-        agentName: 'Jordan Agent',
-        createdAt: '2025-01-01T09:00:00Z',
-        updatedAt: '2025-01-01T12:00:00Z',
-      });
+    http.expectOne('/api/policies/p-1001').flush({
+      id: 'p-1001',
+      policyNumber: 'INS-001',
+      customerName: 'Demo Customer',
+      customerNationalId: 'DEMO-001',
+      insuranceType: 'Life',
+      premium: 200,
+      startDate: '2025-01-01',
+      endDate: '2026-01-01',
+      status: 'ACTIVE',
+      agentId: 'u-1002',
+      agentName: 'Jordan Agent',
+      createdAt: '2025-01-01T09:00:00Z',
+      updatedAt: '2025-01-01T12:00:00Z',
+    });
     harness.detectChanges();
     expect(harness.routeNativeElement?.textContent).toContain('Demo Customer');
     expect(harness.routeNativeElement?.querySelector('a')?.getAttribute('href')).toContain(

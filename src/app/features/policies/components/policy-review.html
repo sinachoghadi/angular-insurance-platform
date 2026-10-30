@@ -1,0 +1,83 @@
+<div class="review">
+  <section>
+    <h3>Customer</h3>
+    <dl>
+      <dt>Full name</dt>
+      <dd>{{ data().customer.fullName || 'Not provided' }}</dd>
+      <dt>National ID</dt>
+      <dd>{{ data().customer.nationalId || 'Not provided' }}</dd>
+      <dt>Mobile</dt>
+      <dd>{{ data().customer.mobile || 'Not provided' }}</dd>
+      <dt>Date of birth</dt>
+      <dd>{{ data().customer.dateOfBirth | date: 'longDate' : 'UTC' }}</dd>
+      <dt>Email</dt>
+      <dd>{{ data().customer.email || 'Not provided' }}</dd>
+    </dl>
+  </section>
+  <section>
+    <h3>Product and coverage</h3>
+    <dl>
+      <dt>Insurance product</dt>
+      <dd>{{ data().insuranceType }}</dd>
+      <dt>Start date</dt>
+      <dd>{{ data().coverage.startDate | date: 'longDate' : 'UTC' }}</dd>
+      <dt>End date</dt>
+      <dd>{{ data().coverage.endDate | date: 'longDate' : 'UTC' }}</dd>
+      <dt>Optional benefits</dt>
+      <dd>{{ data().coverage.options.join(', ') || 'None' }}</dd>
+      @if (vehicle(); as p) {
+        <dt>Vehicle</dt>
+        <dd>{{ p.model }} · {{ p.plate }} · {{ p.year }}</dd>
+        @if (data().insuranceType === 'Car Body') {
+          <dt>Vehicle value</dt>
+          <dd>{{ p.value | currency: 'USD' }}</dd>
+        }
+      }
+      @if (life(); as p) {
+        <dt>Coverage amount</dt>
+        <dd>{{ p.coverageAmount | currency: 'USD' }}</dd>
+        <dt>Payment frequency</dt>
+        <dd>{{ p.paymentFrequency }}</dd>
+        <dt>Beneficiaries</dt>
+        <dd>
+          @for (person of p.beneficiaries; track $index) {
+            <div class="person">
+              {{ person.fullName }} · {{ person.nationalId }} · {{ person.share }}%
+            </div>
+          }
+        </dd>
+      }
+      @if (fire(); as p) {
+        <dt>Property</dt>
+        <dd>{{ p.propertyType }} · {{ p.address }}</dd>
+        <dt>Property value</dt>
+        <dd>{{ p.propertyValue | currency: 'USD' }}</dd>
+      }
+      @if (health(); as p) {
+        <dt>Health coverage</dt>
+        <dd>{{ p.plan }} · {{ p.insuredPersons }} insured persons</dd>
+        <dt>Additional insured persons</dt>
+        <dd>
+          @for (person of p.additionalPersons; track $index) {
+            <div class="person">
+              {{ person.fullName }} · {{ person.nationalId }} ·
+              {{ person.dateOfBirth | date: 'mediumDate' : 'UTC' }}
+            </div>
+          } @empty {
+            None
+          }
+        </dd>
+      }
+    </dl>
+  </section>
+  <section>
+    <h3>Premium summary</h3>
+    <dl>
+      <dt>Total premium (USD)</dt>
+      <dd>{{ premium() | currency: 'USD' }}</dd>
+      <dt>Assigned agent</dt>
+      <dd>{{ agent() || 'Your agent account' }}</dd>
+    </dl>
+    <p>Demo pricing only. Base premium plus $100 per optional benefit. No payment is collected.</p>
+  </section>
+</div>

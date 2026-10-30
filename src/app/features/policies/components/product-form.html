@@ -1,0 +1,171 @@
+<mat-form-field
+  ><mat-label>Insurance product</mat-label
+  ><mat-select [formControl]="group().controls.insuranceType">
+    @for (type of types; track type) {
+      <mat-option [value]="type">{{ type }} Insurance</mat-option>
+    }
+  </mat-select></mat-form-field
+>
+@if (type() === 'Third Party' || type() === 'Car Body') {
+  <div class="field-grid">
+    <app-policy-field
+      label="Vehicle plate number"
+      [control]="group().controls.vehicle.controls.plate"
+    />
+    <app-policy-field label="Vehicle model" [control]="group().controls.vehicle.controls.model" />
+    <app-policy-field
+      label="Manufacturing year (Gregorian)"
+      type="number"
+      [control]="group().controls.vehicle.controls.year"
+    />
+    @if (type() === 'Car Body') {
+      <app-policy-field
+        label="Vehicle value (USD)"
+        type="number"
+        [control]="group().controls.vehicle.controls.value"
+      />
+    }
+  </div>
+}
+@if (type() === 'Life') {
+  <div class="field-grid">
+    <app-policy-field
+      label="Coverage amount (USD)"
+      type="number"
+      [control]="group().controls.life.controls.coverageAmount"
+    />
+    <mat-form-field
+      ><mat-label>Payment frequency</mat-label
+      ><mat-select [formControl]="group().controls.life.controls.paymentFrequency">
+        @for (frequency of ['Monthly', 'Quarterly', 'Annual']; track frequency) {
+          <mat-option [value]="frequency">{{ frequency }}</mat-option>
+        }
+      </mat-select></mat-form-field
+    >
+  </div>
+  <h3>Beneficiaries</h3>
+  <p>Add up to 20 unique beneficiaries. Shares must total 100%.</p>
+  @for (
+    beneficiary of group().controls.life.controls.beneficiaries.controls;
+    track beneficiary;
+    let i = $index
+  ) {
+    <fieldset>
+      <legend>Beneficiary {{ i + 1 }}</legend>
+      <div class="field-grid">
+        <app-policy-field
+          label="Full name"
+          [control]="beneficiary.controls.fullName"
+        /><app-policy-field
+          label="National ID"
+          [control]="beneficiary.controls.nationalId"
+        /><app-policy-field
+          label="Share (%)"
+          type="number"
+          [control]="beneficiary.controls.share"
+        />
+      </div>
+      <button
+        mat-button
+        type="button"
+        (click)="removeBeneficiary(i)"
+        [attr.aria-label]="'Remove beneficiary ' + (i + 1)"
+      >
+        Remove beneficiary
+      </button>
+    </fieldset>
+  }
+  <button
+    mat-button
+    type="button"
+    [disabled]="group().controls.life.controls.beneficiaries.length >= 20"
+    (click)="addBeneficiary()"
+  >
+    Add beneficiary
+  </button>
+}
+@if (type() === 'Fire') {
+  <div class="field-grid">
+    <mat-form-field
+      ><mat-label>Property type</mat-label
+      ><mat-select [formControl]="group().controls.fire.controls.propertyType"
+        ><mat-option value="Residential">Residential</mat-option
+        ><mat-option value="Commercial">Commercial</mat-option></mat-select
+      ></mat-form-field
+    >
+    <app-policy-field
+      label="Property value (USD)"
+      type="number"
+      [control]="group().controls.fire.controls.propertyValue"
+    />
+    <app-policy-field label="Property address" [control]="group().controls.fire.controls.address" />
+  </div>
+}
+@if (type() === 'Health') {
+  <div class="field-grid">
+    <app-policy-field
+      label="Total insured persons"
+      hint="Customer plus additional insured persons"
+      type="number"
+      [control]="group().controls.health.controls.insuredPersons"
+    />
+    <mat-form-field
+      ><mat-label>Coverage plan</mat-label
+      ><mat-select [formControl]="group().controls.health.controls.plan">
+        @for (plan of ['Basic', 'Standard', 'Premium']; track plan) {
+          <mat-option [value]="plan">{{ plan }}</mat-option>
+        }
+      </mat-select></mat-form-field
+    >
+  </div>
+  <h3>Additional insured persons</h3>
+  <p>The customer is the primary insured person. Add up to 20 others.</p>
+  @for (
+    person of group().controls.health.controls.additionalPersons.controls;
+    track person;
+    let i = $index
+  ) {
+    <fieldset>
+      <legend>Additional person {{ i + 1 }}</legend>
+      <div class="field-grid">
+        <app-policy-field label="Full name" [control]="person.controls.fullName" /><app-policy-field
+          label="National ID"
+          [control]="person.controls.nationalId"
+        /><app-policy-field
+          label="Date of birth"
+          type="date"
+          [max]="today"
+          [control]="person.controls.dateOfBirth"
+        />
+      </div>
+      <button
+        mat-button
+        type="button"
+        (click)="removePerson(i)"
+        [attr.aria-label]="'Remove insured person ' + (i + 1)"
+      >
+        Remove person
+      </button>
+    </fieldset>
+  }
+  <button
+    mat-button
+    type="button"
+    [disabled]="group().controls.health.controls.additionalPersons.length >= 20"
+    (click)="addPerson()"
+  >
+    Add insured person
+  </button>
+}
+@if (group().touched && group().invalid) {
+  <p class="validation" role="alert">Complete the required fields for this product.</p>
+  @if (group().hasError('shares')) {
+    <p class="validation">At least one beneficiary is required and shares must total 100%.</p>
+  }
+  @if (group().hasError('duplicates')) {
+    <p class="validation">National IDs must be unique.</p>
+  }
+  @if (group().hasError('insuredCount')) {
+    <p class="validation">Total insured persons must equal the customer plus additional persons.</p>
+  }
+}

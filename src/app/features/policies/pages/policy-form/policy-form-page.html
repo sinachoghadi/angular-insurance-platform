@@ -1,0 +1,124 @@
+<a mat-button routerLink="/policies">← Back to Policies</a>
+<app-page-header
+  [heading]="store.selectedPolicy() ? 'Continue Draft' : 'Create Policy'"
+  description="Prepare a policy in four steps. Save an incomplete draft at any time, then review and submit for approval."
+/>
+@if (store.loading()) {
+  <mat-progress-bar mode="indeterminate" aria-label="Loading draft" />
+  <p role="status">Loading draft…</p>
+}
+@if (store.error()) {
+  <div class="error" role="alert">
+    {{ store.error() }}
+    @if (!store.initialized()) {
+      <button mat-button (click)="retry()">Retry</button>
+    }
+  </div>
+}
+@if (store.initialized()) {
+  <div class="status-bar" aria-live="polite">
+    <span
+      >{{ store.draftStatus() }}
+      @if (store.savedAt()) {
+        · {{ store.savedAt() | date: 'mediumTime' }}
+      }</span
+    ><strong>Estimated premium: {{ store.premium() | currency: 'USD' }}</strong>
+  </div>
+  @if (agentError()) {
+    <p role="alert">
+      Agent options could not be loaded. An assigned agent is required to save a draft.
+      <button mat-button (click)="loadAgents()">Retry agent options</button>
+    </p>
+  }
+  @if (store.busy()) {
+    <mat-progress-bar mode="indeterminate" aria-label="Saving policy" />
+  }
+  @if (store.submitted()) {
+    <p role="status">Policy submitted for approval. Opening policy details…</p>
+  }
+  <div class="workflow" [attr.inert]="store.busy() || store.submitted() ? '' : null">
+    <mat-stepper
+      [orientation]="viewport.isCompact() ? 'vertical' : 'horizontal'"
+      [selectedIndex]="store.currentStep()"
+      (selectionChange)="store.currentStep.set($event.selectedIndex)"
+      [linear]="true"
+    >
+      <mat-step [stepControl]="store.form.controls.customer"
+        ><ng-template matStepLabel>Customer</ng-template>
+        <h2>Customer information</h2>
+        <app-customer-form [group]="store.form.controls.customer" />
+        <div class="step-actions">
+          <button mat-flat-button type="button" (click)="store.next()">Next: Product</button>
+        </div></mat-step
+      >
+      <mat-step [stepControl]="store.form.controls.product"
+        ><ng-template matStepLabel>Product</ng-template>
+        <h2>Insurance product</h2>
+        <app-product-form [group]="store.form.controls.product" [type]="store.selectedType()" />
+        <div class="step-actions">
+          <button mat-button type="button" (click)="store.currentStep.set(0)">Back</button
+          ><button mat-flat-button type="button" (click)="store.next()">Next: Coverage</button>
+        </div></mat-step
+      >
+      <mat-step [stepControl]="store.form.controls.coverage"
+        ><ng-template matStepLabel>Coverage</ng-template>
+        <h2>Coverage details</h2>
+        <app-coverage-form
+          [group]="store.form.controls.coverage"
+          [agentControl]="store.form.controls.agentId"
+          [admin]="store.admin"
+          [agents]="agents()"
+        />
+        <div class="step-actions">
+          <button mat-button type="button" (click)="store.currentStep.set(1)">Back</button
+          ><button mat-flat-button type="button" (click)="store.next()">Next: Review</button>
+        </div></mat-step
+      >
+      <mat-step
+        ><ng-template matStepLabel>Review &amp; Submit</ng-template>
+        <h2>Review your policy</h2>
+        <p>
+          Check customer, coverage and premium details. Submitted policies become read-only while
+          approval is pending.
+        </p>
+        <app-policy-review
+          [data]="store.snapshot()"
+          [premium]="store.premium()"
+          [agent]="agentName()"
+        />
+        <div class="step-actions">
+          <button mat-button type="button" (click)="store.currentStep.set(2)">Back</button
+          ><button
+            mat-flat-button
+            type="button"
+            (click)="store.submit()"
+            [disabled]="store.busy() || store.submitted()"
+          >
+            Submit for approval
+          </button>
+        </div></mat-step
+      >
+    </mat-stepper>
+  </div>
+  <div class="draft-actions">
+    <button
+      mat-stroked-button
+      type="button"
+      (click)="store.save()"
+      [disabled]="store.busy() || store.submitted()"
+    >
+      {{ store.saving() ? 'Saving…' : 'Save Draft' }}
+    </button>
+    @if (store.selectedPolicy(); as policy) {
+      <a mat-button [routerLink]="['/policies', policy.id]">View saved draft</a>
+    }
+    <button
+      mat-button
+      type="button"
+      (click)="discard()"
+      [disabled]="store.busy() || store.submitted()"
+    >
+      Discard Draft
+    </button>
+  </div>
+}

@@ -1,5 +1,38 @@
 # Progress
 
+## Phase 4 — Policy Creation and Draft Editing
+
+**Status:** Implemented within the requested scope; no next phase started.
+
+### Delivered
+
+- Lazy four-step Material Stepper with typed customer/product/coverage forms and review.
+- Five dynamic products, shared vehicle controls, conditional validators and retained
+  in-page product values. Dynamic beneficiary and additional-insured FormArrays.
+- National ID/mobile/email/date validation, shares, duplicate IDs, insured-count and date-range rules.
+- Signal-based page state and RxJS HTTP flows, cancelable loads, explicit saves, duplicate
+  prevention, idempotent create recovery and optimistic version conflict handling.
+- Draft creation/update/restore/discard and DRAFT → PENDING submission with independent
+  backend validation, existing session/XSRF protection and role/ownership enforcement.
+- File-backed persistence across server restarts; serialized mutations and atomic rename.
+- Create/Edit/Continue integration, detailed product review and unsaved-change confirmations.
+- Documentation, endpoint contract, file inventory and Angular explanations in
+  [POLICY_CREATION.md](POLICY_CREATION.md).
+
+### Verification and limitations
+
+- Final Angular verification: 22 test files, 124 tests passed (`ng test --watch=false`).
+- Final backend verification: 27 tests passed (`node --test "mock-api/*.test.mjs"`),
+  including isolated disk persistence/restart, authorization, validation and concurrent submission.
+- Production build succeeds: initial 509.08 kB raw / about 127.48 kB transferred.
+  The existing 500 kB warning budget is exceeded by 9.08 kB; no error budget is exceeded.
+- `git diff --check`: passed.
+- Pricing is simulated USD; national ID validation checks format, not identity/checksum.
+- The file store supports one mock server process; sessions still reset on restart.
+- No Claims, approval processing, payments or other phases were implemented.
+- Existing initial-bundle warning remains; budget has not been raised. No manual visual
+  browser review is claimed.
+
 ## Phase 3 — Policy Management listing and details
 
 **Status:** Implemented within the explicitly requested read-only scope. No next phase started.

@@ -1,0 +1,31 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+.field-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr));
+  gap: 20px;
+  margin-block: 20px;
+}
+mat-form-field {
+  width: 100%;
+  min-width: 0;
+}
+fieldset {
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 12px;
+  padding: 16px;
+  margin-block: 16px;
+  min-width: 0;
+}
+legend {
+  padding-inline: 8px;
+  font-weight: 600;
+}
+p {
+  color: var(--mat-sys-on-surface-variant);
+}
+.validation {
+  color: var(--mat-sys-error);
+}

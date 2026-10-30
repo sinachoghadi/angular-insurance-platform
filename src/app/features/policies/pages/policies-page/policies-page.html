@@ -1,7 +1,8 @@
 <app-page-header
   heading="Policies"
   description="Explore insurance policies, customers and coverage. Fictional demo data · Premiums in USD."
-/>
+  ><a mat-flat-button routerLink="/policies/new">Create Policy</a></app-page-header
+>
 <section class="panel" aria-label="Policy management" [attr.aria-busy]="store.loading()">
   <app-policy-filters
     [query]="store.query()"

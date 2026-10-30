@@ -1,3 +1,4 @@
+import type { PolicyFormData } from './policy-form';
 export const INSURANCE_TYPES = ['Third Party', 'Car Body', 'Life', 'Fire', 'Health'] as const;
 export const POLICY_STATUSES = ['DRAFT', 'PENDING', 'ACTIVE', 'REJECTED', 'EXPIRED'] as const;
 export interface Policy {
@@ -14,6 +15,8 @@ export interface Policy {
   readonly agentName: string;
   readonly createdAt: string;
   readonly updatedAt: string;
+  readonly formData?: PolicyFormData;
+  readonly version?: number;
 }
 export interface PolicyPage {
   items: Policy[];

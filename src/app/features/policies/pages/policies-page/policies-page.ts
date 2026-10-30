@@ -1,5 +1,6 @@
 ﻿import { Component, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { RouterLink } from '@angular/router';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatProgressBar } from '@angular/material/progress-bar';
 import { MatButton } from '@angular/material/button';
@@ -16,7 +17,15 @@ import { PageHeader } from '../../../../shared/components/page-header/page-heade
 @Component({
   selector: 'app-policies-page',
   providers: [PolicyStore],
-  imports: [PageHeader, PolicyFilters, PolicyTable, MatPaginator, MatProgressBar, MatButton],
+  imports: [
+    RouterLink,
+    PageHeader,
+    PolicyFilters,
+    PolicyTable,
+    MatPaginator,
+    MatProgressBar,
+    MatButton,
+  ],
   templateUrl: './policies-page.html',
   styleUrl: './policies-page.scss',
 })

@@ -1,5 +1,31 @@
 # Architecture Decision Log
 
+## ADR-018 — Typed policy workflow and persistent, versioned drafts
+
+**Decision:** Extend ADR-017's read-only phase with the now-approved creation/editing scope.
+Use a four-step Material workflow, explicit typed product groups and FormArrays. Disable
+inactive groups to preserve in-page values; serialize only the selected product. Keep
+validators/form factories separate from the page-scoped signal-based `PolicyFormStore`
+and presentation components. Explicit Save Draft replaces autosave for predictable writes.
+
+**Backend:** Reuse cookie sessions/XSRF and independently validate the whitelisted form
+contract. Admin may assign agents; Agent identity always comes from the session. Only
+DRAFT records may be updated/discarded/submitted. Require optimistic `version` checks,
+serialize mutations, and enforce DRAFT → PENDING atomically. Idempotent creation prevents
+duplicates after uncertain responses; replays must still satisfy authorization.
+
+**Persistence:** Store development records in ignored `mock-api/.data/policies.json` via
+atomic rename, publishing new in-memory state only after persistence succeeds. Keep
+sessions in memory. This is deliberately a single-process development repository, not a
+production database. New UUID IDs coexist with legacy numeric seeds. Add DELETE for the
+requested discard action, with client confirmation and server authorization/version checks.
+
+**UX:** Block writes on repeat clicks, protect unsaved router/browser exits, and retain
+the form/current step during saves. Reuse a policy review component in form and details.
+USD premiums are clearly labeled simulated estimates; the server calculates authoritative
+values. National IDs validate format only. No Claims, authentication rewrite, approval
+processing, or later-phase work is included. See [Policy Creation](POLICY_CREATION.md).
+
 ## ADR-017 — Read-only Policy Management with URL-owned state
 
 **Decision:** Implement listing and details only. Keep the existing cookie authentication

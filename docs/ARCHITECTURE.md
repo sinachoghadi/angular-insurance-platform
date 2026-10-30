@@ -112,6 +112,8 @@ All endpoints are served under the `/api` prefix (for example `/api/auth/login`)
 - GET /policies/:id
 - POST /policies
 - PATCH /policies/:id
+- POST /policies/:id/submit
+- DELETE /policies/:id (authorized drafts only)
 
 **Claims**
 

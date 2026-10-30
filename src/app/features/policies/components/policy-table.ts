@@ -138,6 +138,14 @@ import { PolicyStatusBadge } from './policy-status-badge';
             [attr.aria-label]="'View ' + p.policyNumber"
             >View</a
           >
+          @if (p.status === 'DRAFT') {
+            <a
+              mat-button
+              [routerLink]="['/policies', p.id, 'edit']"
+              [attr.aria-label]="'Edit draft ' + p.policyNumber"
+              >Edit Draft</a
+            >
+          }
         </td></ng-container
       >
       <tr mat-header-row *matHeaderRowDef="columns"></tr>

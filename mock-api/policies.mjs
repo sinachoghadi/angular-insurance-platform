@@ -25,7 +25,7 @@ export const POLICIES = Array.from({ length: 180 }, (_, i) => {
 });
 
 const sorts = ['policyNumber', 'premium', 'startDate', 'endDate', 'createdAt'];
-export function listPolicies(params, user) {
+export function listPolicies(params, user, records = POLICIES) {
   const integer = (key, fallback) =>
     /^\d+$/.test(params.get(key) ?? '') &&
     Number.isSafeInteger(Number(params.get(key))) &&
@@ -44,24 +44,26 @@ export function listPolicies(params, user) {
       ? value
       : '';
   };
-  const items = POLICIES.filter(
-    (p) =>
-      (user.role === 'ADMIN' || p.agentId === user.id) &&
-      (!search ||
-        [p.policyNumber, p.customerName, p.customerNationalId].some((v) =>
-          v.toLowerCase().includes(search),
-        )) &&
-      (!TYPES.includes(params.get('insuranceType')) ||
-        p.insuranceType === params.get('insuranceType')) &&
-      (!STATUSES.includes(params.get('status')) || p.status === params.get('status')) &&
-      (user.role !== 'ADMIN' || !params.get('agentId') || p.agentId === params.get('agentId')) &&
-      (!date('startFrom') || p.startDate >= date('startFrom')) &&
-      (!date('startTo') || p.startDate <= date('startTo')),
-  ).sort(
-    (a, b) =>
-      direction * (a[sortBy] < b[sortBy] ? -1 : a[sortBy] > b[sortBy] ? 1 : 0) ||
-      a.id.localeCompare(b.id),
-  );
+  const items = records
+    .filter(
+      (p) =>
+        (user.role === 'ADMIN' || p.agentId === user.id) &&
+        (!search ||
+          [p.policyNumber, p.customerName, p.customerNationalId].some((v) =>
+            v.toLowerCase().includes(search),
+          )) &&
+        (!TYPES.includes(params.get('insuranceType')) ||
+          p.insuranceType === params.get('insuranceType')) &&
+        (!STATUSES.includes(params.get('status')) || p.status === params.get('status')) &&
+        (user.role !== 'ADMIN' || !params.get('agentId') || p.agentId === params.get('agentId')) &&
+        (!date('startFrom') || p.startDate >= date('startFrom')) &&
+        (!date('startTo') || p.startDate <= date('startTo')),
+    )
+    .sort(
+      (a, b) =>
+        direction * (a[sortBy] < b[sortBy] ? -1 : a[sortBy] > b[sortBy] ? 1 : 0) ||
+        a.id.localeCompare(b.id),
+    );
   const page = Math.min(integer('page', 1), Math.max(1, Math.ceil(items.length / pageSize)));
   return {
     items: items.slice((page - 1) * pageSize, page * pageSize),
