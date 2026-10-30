@@ -1,2 +1,42 @@
-<app-page-header heading="Claims" description="Review, approve, and track insurance claims." />
-<app-feature-placeholder icon="assignment" [plannedItems]="plannedItems" />
+<app-page-header
+  heading="Claims"
+  description="Track incidents, review outcomes and follow claim progress. Fictional demo data · USD amounts."
+  ><a mat-flat-button routerLink="/claims/new">Create Claim</a></app-page-header
+>
+<section class="panel" aria-label="Claim management" [attr.aria-busy]="store.loading()">
+  <app-claim-filters
+    [query]="store.query()"
+    (change)="store.update($event)"
+    (clear)="store.clear()"
+  />
+  <div class="summary" aria-live="polite">
+    {{ store.result().total }} claims · {{ store.filterCount() }} active filters
+  </div>
+  @if (store.loading()) {
+    <mat-progress-bar mode="indeterminate" aria-label="Loading claims" />
+    <p class="state" role="status">Loading claims…</p>
+  } @else if (store.error()) {
+    <div class="state" role="alert">
+      <h2>Unable to load claims</h2>
+      <button mat-flat-button (click)="store.retry()">Retry</button>
+    </div>
+  } @else if (store.empty()) {
+    <div class="state">
+      <h2>No claims found</h2>
+      <p>Try another search or clear filters.</p>
+      <button mat-button (click)="store.clear()">Clear filters</button>
+    </div>
+  } @else {
+    <app-claim-table [items]="store.result().items" [query]="store.query()" (sort)="sort($event)" />
+  }
+  <mat-paginator
+    aria-label="Claim pagination"
+    [disabled]="store.loading()"
+    [length]="store.result().total"
+    [pageSize]="store.query().pageSize"
+    [pageIndex]="store.result().page - 1"
+    [pageSizeOptions]="[10, 25, 50]"
+    showFirstLastButtons
+    (page)="store.update({ page: $event.pageIndex + 1, pageSize: $event.pageSize }, false)"
+  />
+</section>

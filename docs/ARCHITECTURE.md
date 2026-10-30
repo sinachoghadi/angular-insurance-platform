@@ -120,7 +120,14 @@ All endpoints are served under the `/api` prefix (for example `/api/auth/login`)
 - GET /claims
 - GET /claims/:id
 - POST /claims
-- PATCH /claims/:id/status
+- POST /claims/:id/transition (Admin review, versioned state machine)
+- GET /claims/:id/history
+- GET /claims/:id/notes (Admin only)
+- POST /claims/:id/notes (Admin only)
+
+Claims, history and internal notes are persisted atomically in `mock-api/.data/claims.json`.
+Agent claim access derives from the associated policy's assigned Agent. The current role
+model remains Admin/Agent; Admin performs review actions for this phase.
 
 **Users**
 

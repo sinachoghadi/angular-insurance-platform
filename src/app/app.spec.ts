@@ -103,6 +103,10 @@ describe('App routing', () => {
           .expectOne((request) => request.url === '/api/policies')
           .flush({ items: [], total: 0, page: 1, pageSize: 10 });
       }
+      if (url === '/claims')
+        http
+          .expectOne((r) => r.url === '/api/claims')
+          .flush({ items: [], total: 0, page: 1, pageSize: 10 });
 
       expect(heading()).toBe(expectedHeading);
     });
@@ -139,6 +143,9 @@ describe('App routing', () => {
 
     it('keeps access to the sections the role allows', async () => {
       await navigateAs(AGENT_USER, '/claims');
+      http
+        .expectOne((r) => r.url === '/api/claims')
+        .flush({ items: [], total: 0, page: 1, pageSize: 10 });
 
       expect(heading()).toBe('Claims');
     });

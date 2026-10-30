@@ -6,6 +6,9 @@ import { USERS, toUserDto } from './users.mjs';
 import { listPolicies } from './policies.mjs';
 import { createPolicyRepository } from './policy-repository.mjs';
 import { PolicyError, projectForm, validatePolicyInput } from './policy-validation.mjs';
+import { createClaimRepository } from './claim-repository.mjs';
+import { createClaimHandler } from './claim-endpoints.mjs';
+import { ClaimError } from './claims.mjs';
 
 export const SESSION_COOKIE = 'ins_session';
 export const XSRF_COOKIE = 'XSRF-TOKEN';
@@ -23,7 +26,7 @@ class HttpError extends Error {
 }
 
 /**
- * @param {{ sessionTtlMs?: number; latencyMs?: number; now?: () => number; policyFile?: string }} [options]
+ * @param {{ sessionTtlMs?: number; latencyMs?: number; now?: () => number; policyFile?: string; claimFile?: string }} [options]
  * @returns {(req: import('node:http').IncomingMessage, res: import('node:http').ServerResponse) => void}
  */
 export function createApp({
@@ -31,8 +34,18 @@ export function createApp({
   latencyMs = 0,
   now = Date.now,
   policyFile,
+  claimFile,
 } = {}) {
   const repository = createPolicyRepository(policyFile);
+  const claims = createClaimRepository(claimFile, repository.list());
+  const claimHandler = createClaimHandler({
+    claims,
+    policies: repository,
+    authorize,
+    authorizeWrite,
+    readJson,
+    sendJson,
+  });
   /** @type {Map<string, { userId: string; xsrfToken: string; expiresAt: number }>} */
   const sessions = new Map();
 
@@ -207,6 +220,9 @@ export function createApp({
     const detail = /^\/api\/policies\/[^/]+$/.test(pathname);
     const submit = /^\/api\/policies\/[^/]+\/submit$/.test(pathname);
     const handler =
+      (pathname === '/api/claims' || pathname.startsWith('/api/claims/')
+        ? claimHandler
+        : undefined) ??
       routes[`${req.method} ${pathname}`] ??
       (detail && req.method === 'GET'
         ? (req, res) => {
@@ -258,7 +274,8 @@ export function createApp({
         }
         await handler(req, res);
       } catch (error) {
-        const known = error instanceof HttpError || error instanceof PolicyError;
+        const known =
+          error instanceof HttpError || error instanceof PolicyError || error instanceof ClaimError;
         const status = known ? error.status : 500;
         const message = known ? error.message : 'Internal server error.';
         if (status === 500) console.error(error);

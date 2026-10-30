@@ -1,0 +1,18 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+.panel {
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--mat-sys-surface);
+}
+.summary {
+  padding: 0 20px 16px;
+  color: var(--mat-sys-on-surface-variant);
+}
+.state {
+  padding: 40px 20px;
+  text-align: center;
+}

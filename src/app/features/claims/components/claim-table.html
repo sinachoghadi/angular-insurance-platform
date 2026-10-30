@@ -1,0 +1,89 @@
+<div class="table-region" role="region" aria-label="Claims table" tabindex="0">
+  <table
+    mat-table
+    [dataSource]="items()"
+    matSort
+    [matSortActive]="query().sortBy"
+    [matSortDirection]="query().sortOrder"
+    [matSortDisableClear]="true"
+    (matSortChange)="sort.emit($event)"
+  >
+    <ng-container matColumnDef="claimNumber"
+      ><th
+        mat-header-cell
+        *matHeaderCellDef
+        mat-sort-header
+        sortActionDescription="Sort by claim number"
+      >
+        Claim number
+      </th>
+      <td mat-cell *matCellDef="let c">
+        <a [routerLink]="['/claims', c.id]" [queryParams]="query()">{{ c.claimNumber }}</a>
+      </td></ng-container
+    >
+    <ng-container matColumnDef="policyNumber"
+      ><th
+        mat-header-cell
+        *matHeaderCellDef
+        mat-sort-header
+        sortActionDescription="Sort by policy number"
+      >
+        Policy number
+      </th>
+      <td mat-cell *matCellDef="let c">
+        <a [routerLink]="['/policies', c.policyId]">{{ c.policyNumber }}</a>
+      </td></ng-container
+    >
+    <ng-container matColumnDef="customerName"
+      ><th
+        mat-header-cell
+        *matHeaderCellDef
+        mat-sort-header
+        sortActionDescription="Sort by customer"
+      >
+        Customer
+      </th>
+      <td mat-cell *matCellDef="let c">{{ c.customerName }}</td></ng-container
+    >
+    <ng-container matColumnDef="incidentDate"
+      ><th
+        mat-header-cell
+        *matHeaderCellDef
+        mat-sort-header
+        sortActionDescription="Sort by incident date"
+      >
+        Incident date
+      </th>
+      <td mat-cell *matCellDef="let c">
+        {{ c.incidentDate | date: 'mediumDate' : 'UTC' }}
+      </td></ng-container
+    >
+    <ng-container matColumnDef="estimatedAmount"
+      ><th
+        mat-header-cell
+        *matHeaderCellDef
+        mat-sort-header
+        sortActionDescription="Sort by estimated amount"
+      >
+        Estimated amount
+      </th>
+      <td mat-cell *matCellDef="let c">{{ c.estimatedAmount | currency: 'USD' }}</td></ng-container
+    >
+    <ng-container matColumnDef="status"
+      ><th mat-header-cell *matHeaderCellDef>Status</th>
+      <td mat-cell *matCellDef="let c"><app-claim-status-badge [status]="c.status" /></td
+    ></ng-container>
+    <ng-container matColumnDef="officer"
+      ><th mat-header-cell *matHeaderCellDef>Assigned officer</th>
+      <td mat-cell *matCellDef="let c">{{ c.assignedOfficerName }}</td></ng-container
+    >
+    <ng-container matColumnDef="actions"
+      ><th mat-header-cell *matHeaderCellDef>Actions</th>
+      <td mat-cell *matCellDef="let c">
+        <a mat-button [routerLink]="['/claims', c.id]" [queryParams]="query()">View</a>
+      </td></ng-container
+    >
+    <tr mat-header-row *matHeaderRowDef="columns"></tr>
+    <tr mat-row *matRowDef="let row; columns: columns"></tr>
+  </table>
+</div>

@@ -1,5 +1,36 @@
 # Progress
 
+## Phase 5 — Claims Management
+
+**Status:** Implemented in the requested scope; no next phase started.
+
+### Delivered
+
+- Typed Claim/History/ReviewNote DTOs and 90 fictional seed claims.
+- Server-paginated/searchable/filterable/sortable list with shareable URL state and browser
+  Back/Forward restoration; Material table, badges, loading/empty/retry states.
+- Typed creation form with paginated ACTIVE policy lookup, incident coverage/future-date
+  rules, positive USD estimates, duplicate-action prevention and idempotent retry recovery.
+- Claim details, linked Policy, financial data, assigned reviewer and chronological history.
+- Admin review/approval/rejection/closure state machine with confirmation dialog, required
+  rejection reason, optimistic versions and server-authored history.
+- Admin-only internal notes with validation, author/timestamp display and persistent storage.
+- Backend role/ownership/XSRF enforcement; Agent access derives from assigned policies.
+- Claims/history/notes persisted atomically across restarts. Existing Auth/Policy behavior retained.
+- Contract, file inventory, decisions and Angular explanations: [CLAIMS_API.md](CLAIMS_API.md).
+
+### Verification and limits
+
+- Final Angular verification: 32 test files, 155 tests passed (`ng test --watch=false`).
+- Final backend verification: 36 tests passed (`node --test "mock-api/*.test.mjs"`),
+  including all 25 status pairs, ownership, notes privacy, concurrency and restart persistence.
+- Production build succeeds: initial 508.88 kB raw / about 129.55 kB transferred.
+  Existing 500 kB warning budget exceeded by 8.88 kB; no error budget exceeded.
+- `git diff --check`: passed.
+- Existing bundle warning remains; no budget increase. No manual browser visual review claimed.
+- File store is for one mock server process; sessions reset on restart. No officer role,
+  payment processing, attachments or next-phase work added.
+
 ## Phase 4 — Policy Creation and Draft Editing
 
 **Status:** Implemented within the requested scope; no next phase started.

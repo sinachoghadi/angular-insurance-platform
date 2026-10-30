@@ -1,0 +1,46 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+.details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+  gap: 20px;
+}
+section {
+  padding: 24px;
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 16px;
+  background: var(--mat-sys-surface);
+}
+h2 {
+  font-size: 18px;
+  margin-top: 0;
+}
+dl {
+  margin: 0;
+}
+dt {
+  font-size: 13px;
+  color: var(--mat-sys-on-surface-variant);
+  margin-top: 16px;
+}
+dd {
+  margin: 4px 0 0;
+  overflow-wrap: anywhere;
+}
+.description {
+  white-space: pre-wrap;
+}
+.actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-block: 16px;
+}
+.error {
+  color: var(--mat-sys-error);
+}
+a {
+  color: var(--mat-sys-primary);
+}

@@ -1,0 +1,55 @@
+import { Claim, ClaimHistory, ReviewNote } from '../models/claim';
+import { Policy } from '../../policies/models/policy';
+export const ACTIVE_POLICY: Policy = {
+  id: 'p-1001',
+  policyNumber: 'INS-DEMO',
+  customerName: 'Demo Customer',
+  customerNationalId: 'DEMO-001',
+  insuranceType: 'Third Party',
+  premium: 300,
+  startDate: '2025-01-01',
+  endDate: '2027-12-31',
+  status: 'ACTIVE',
+  agentId: 'u-1002',
+  agentName: 'Jordan Agent',
+  createdAt: '2025-01-01T00:00:00Z',
+  updatedAt: '2025-01-01T00:00:00Z',
+};
+export const CLAIM: Claim = {
+  id: 'c-1001',
+  claimNumber: 'CLM-DEMO-001',
+  policyId: ACTIVE_POLICY.id,
+  policyNumber: ACTIVE_POLICY.policyNumber,
+  customerName: ACTIVE_POLICY.customerName,
+  incidentDate: '2025-02-01',
+  reportedDate: '2025-02-02T00:00:00Z',
+  claimType: 'Accident',
+  description: 'Fictional incident report for tests.',
+  estimatedAmount: 1000,
+  approvedAmount: null,
+  status: 'SUBMITTED',
+  assignedOfficerId: 'u-1001',
+  assignedOfficerName: 'Avery Admin',
+  createdBy: 'u-1002',
+  createdAt: '2025-02-02T00:00:00Z',
+  updatedAt: '2025-02-02T00:00:00Z',
+  version: 1,
+};
+export const HISTORY: ClaimHistory = {
+  id: 'h-1',
+  claimId: CLAIM.id,
+  previousStatus: null,
+  newStatus: 'SUBMITTED',
+  changedBy: 'u-1002',
+  changedByName: 'Jordan Agent',
+  changedAt: CLAIM.createdAt,
+  note: 'Claim submitted.',
+};
+export const NOTE: ReviewNote = {
+  id: 'n-1',
+  claimId: CLAIM.id,
+  authorId: 'u-1001',
+  authorName: 'Avery Admin',
+  content: 'Internal only demo note',
+  createdAt: CLAIM.createdAt,
+};

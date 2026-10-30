@@ -1,0 +1,106 @@
+<a mat-button routerLink="/claims">← Back to Claims</a
+><app-page-header
+  heading="Create Claim"
+  description="Report a fictional incident against an active policy. Amounts are estimates in USD; no payment is processed."
+/>
+@if (store.error()) {
+  <p role="alert" class="error">{{ store.error() }}</p>
+}
+@if (store.success()) {
+  <p role="status">Claim submitted successfully. Opening details…</p>
+}
+<form [formGroup]="store.form" (ngSubmit)="store.submit()">
+  <div
+    class="panel"
+    [attr.inert]="store.saving() || store.uncertain() || store.success() ? '' : null"
+  >
+    <h2>Select an ACTIVE policy</h2>
+    <mat-form-field
+      ><mat-label>Find policy</mat-label
+      ><input matInput [formControl]="store.search" placeholder="Policy number or customer"
+    /></mat-form-field>
+    @if (store.policyLoading()) {
+      <mat-progress-bar mode="indeterminate" aria-label="Loading eligible policies" />
+    }
+    @if (store.policyError()) {
+      <p role="alert">
+        Unable to load eligible policies.
+        <button type="button" mat-button (click)="store.retryPolicies()">Retry</button>
+      </p>
+    }
+    <mat-form-field
+      ><mat-label>Active policy</mat-label
+      ><mat-select formControlName="policyId" (selectionChange)="store.select($event.value)">
+        @for (policy of store.options(); track policy.id) {
+          <mat-option [value]="policy.id"
+            >{{ policy.policyNumber }} · {{ policy.customerName }}</mat-option
+          >
+        }</mat-select
+      ><mat-error>Select an active policy.</mat-error></mat-form-field
+    >
+    @if (!store.policyLoading() && !store.policyError() && !store.policyPage().total) {
+      <p role="status">No eligible policies found. Try another search.</p>
+    }
+    <mat-paginator
+      aria-label="Eligible policy pages"
+      [length]="store.policyPage().total"
+      [pageSize]="10"
+      [pageIndex]="store.policyPage().page - 1"
+      [hidePageSize]="true"
+      [disabled]="store.policyLoading()"
+      (page)="store.policyPageChange($event.pageIndex + 1)"
+    />
+    @if (store.selectedPolicy(); as policy) {
+      <p>
+        Coverage: {{ policy.startDate | date: 'mediumDate' : 'UTC' }} –
+        {{ policy.endDate | date: 'mediumDate' : 'UTC' }}. Customer: {{ policy.customerName }}
+      </p>
+    }
+    <h2>Incident information</h2>
+    <div class="grid">
+      <mat-form-field
+        ><mat-label>Incident date</mat-label
+        ><input matInput type="date" formControlName="incidentDate" [max]="today" /><mat-error
+          >Enter a valid date that is not in the future.</mat-error
+        ></mat-form-field
+      ><mat-form-field
+        ><mat-label>Claim type</mat-label
+        ><mat-select formControlName="claimType">
+          @for (type of types; track type) {
+            <mat-option [value]="type">{{ type }}</mat-option>
+          }
+        </mat-select></mat-form-field
+      ><mat-form-field
+        ><mat-label>Estimated amount (USD)</mat-label
+        ><input
+          matInput
+          type="number"
+          min="0.01"
+          step="0.01"
+          formControlName="estimatedAmount"
+        /><mat-error>Enter a positive amount with at most 2 decimals.</mat-error></mat-form-field
+      >
+    </div>
+    <mat-form-field
+      ><mat-label>Incident description</mat-label
+      ><textarea matInput rows="5" maxlength="2000" formControlName="description"></textarea
+      ><mat-hint>10–2000 characters. Use fictional information only.</mat-hint
+      ><mat-error>Describe the incident in 10–2000 characters.</mat-error></mat-form-field
+    >
+    @if (store.form.touched && store.form.hasError('coverage')) {
+      <p role="alert" class="error">
+        Incident date must fall within the selected policy's coverage period.
+      </p>
+    }
+  </div>
+  <div class="actions">
+    <button mat-flat-button type="submit" [disabled]="store.saving() || store.success()">
+      {{
+        store.saving() ? 'Submitting…' : store.uncertain() ? 'Retry submission' : 'Submit Claim'
+      }}</button
+    ><a mat-button routerLink="/claims">Cancel</a>
+  </div>
+  @if (store.saving()) {
+    <mat-progress-bar mode="indeterminate" aria-label="Submitting claim" />
+  }
+</form>

@@ -1,0 +1,96 @@
+<a mat-button routerLink="/claims" [queryParams]="backQuery">← Back to Claims</a
+><app-page-header
+  [heading]="store.claim()?.claimNumber ?? 'Claim details'"
+  description="Incident report and review progress · Fictional demo data"
+/>
+@if (store.loading()) {
+  <mat-progress-bar mode="indeterminate" aria-label="Loading claim" />
+  <p role="status">Loading claim…</p>
+} @else if (store.error()) {
+  <section role="alert">
+    <h2>{{ store.error() }}</h2>
+    <button mat-flat-button (click)="store.retry()">Retry</button>
+  </section>
+} @else if (store.claim(); as claim) {
+  @if (store.actionError()) {
+    <p role="alert" class="error">
+      {{ store.actionError() }}
+      <button mat-button (click)="store.retry()" [disabled]="store.busy()">Reload claim</button>
+    </p>
+  }
+  @if (store.success()) {
+    <p role="status">{{ store.success() }}</p>
+  }
+  <div class="actions">
+    @for (target of store.transitions(); track target) {
+      <button mat-stroked-button [disabled]="store.busy()" (click)="confirm(target)">
+        {{ labels[target] }}
+      </button>
+    }
+  </div>
+  @if (store.busy()) {
+    <mat-progress-bar mode="indeterminate" aria-label="Updating claim" />
+  }
+  <div class="details">
+    <section>
+      <h2>Claim information</h2>
+      <dl>
+        <dt>Status</dt>
+        <dd><app-claim-status-badge [status]="claim.status" /></dd>
+        <dt>Linked policy</dt>
+        <dd>
+          <a [routerLink]="['/policies', claim.policyId]">{{ claim.policyNumber }}</a>
+        </dd>
+        <dt>Customer</dt>
+        <dd>{{ claim.customerName }}</dd>
+        <dt>Assigned officer</dt>
+        <dd>{{ claim.assignedOfficerName }}</dd>
+        <dt>Created by</dt>
+        <dd>{{ claim.createdBy }}</dd>
+      </dl>
+    </section>
+    <section>
+      <h2>Incident and financial details</h2>
+      <dl>
+        <dt>Claim type</dt>
+        <dd>{{ claim.claimType }}</dd>
+        <dt>Incident date</dt>
+        <dd>{{ claim.incidentDate | date: 'longDate' : 'UTC' }}</dd>
+        <dt>Reported</dt>
+        <dd>{{ claim.reportedDate | date: 'medium' : 'UTC' }} UTC</dd>
+        <dt>Estimated amount</dt>
+        <dd>{{ claim.estimatedAmount | currency: 'USD' }}</dd>
+        <dt>Approved amount</dt>
+        <dd>
+          {{
+            claim.approvedAmount === null
+              ? 'Not approved'
+              : (claim.approvedAmount | currency: 'USD')
+          }}
+        </dd>
+        <dt>Description</dt>
+        <dd class="description">{{ claim.description }}</dd>
+      </dl>
+    </section>
+    <section><app-claim-history [items]="store.history()" /></section>
+    @if (store.admin) {
+      <section>
+        <app-claim-review-notes
+          [notes]="store.notes()"
+          [busy]="store.busy()"
+          [savedSequence]="store.noteSaved()"
+          (add)="store.addNote($event)"
+        />
+      </section>
+    }
+    <section>
+      <h2>Record timestamps</h2>
+      <dl>
+        <dt>Created</dt>
+        <dd>{{ claim.createdAt | date: 'medium' : 'UTC' }} UTC</dd>
+        <dt>Updated</dt>
+        <dd>{{ claim.updatedAt | date: 'medium' : 'UTC' }} UTC</dd>
+      </dl>
+    </section>
+  </div>
+}

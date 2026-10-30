@@ -1,5 +1,30 @@
 # Architecture Decision Log
 
+## ADR-019 — Claims workflow with policy-derived access and Admin-only notes
+
+**Decision:** Implement Claims listing/creation/details, public status history and internal
+review notes. Preserve the two existing roles: Admin performs review; Agents can read and
+create claims only on assigned policies. Author identity is audit data, not ownership.
+Internal notes are Admin-only at both API and UI boundaries and are never embedded in
+public claim/history responses. Workflow reasons are Agent-visible and labeled accordingly.
+
+**State machine:** Only SUBMITTED → UNDER_REVIEW, UNDER_REVIEW → APPROVED/REJECTED and
+APPROVED/REJECTED → CLOSED. Require rejection reason and positive approval amount bounded
+by the estimate. Version checks, serialized mutations and atomic claim/history persistence
+prevent stale reviews and duplicate audit entries. Idempotent creation recovers uncertain
+responses without duplicate claims. Server generates all history, author IDs and timestamps.
+
+**Client:** Follow existing feature-scoped Signals/RxJS/URL patterns, typed forms and direct
+standalone Material imports. Reuse PolicyApi's paginated ACTIVE policy lookup. Split table,
+filters, status badge, timeline, notes and review dialog into presentation components.
+Never request internal notes for Agents. Cancel obsolete reads and ignore mutation results
+belonging to a claim that is no longer displayed. Confirmation includes reviewed version.
+
+**Persistence:** A separate file repository stores claims, history and notes together, with
+the existing development pattern of serialized mutations and atomic rename. Do not rewrite
+Policy persistence or authentication. One-process/file-store limits and future cross-entity
+transaction needs are documented in [CLAIMS_API.md](CLAIMS_API.md). No later phase started.
+
 ## ADR-018 — Typed policy workflow and persistent, versioned drafts
 
 **Decision:** Extend ADR-017's read-only phase with the now-approved creation/editing scope.
